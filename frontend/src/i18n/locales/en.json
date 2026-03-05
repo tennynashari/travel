@@ -272,5 +272,117 @@
       "customer": "Customer",
       "activeUsers": "Active Users"
     }
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Business data analysis and reporting",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "refreshData": "Refresh Data",
+    "loadError": "Failed to load report data",
+    "exportError": "Failed to export report",
+    "loadingData": "Loading report data...",
+    "export": "Export",
+    "tabs": {
+      "overview": "Overview",
+      "sales": "Sales",
+      "route": "Per Route",
+      "vehicle": "Fleet",
+      "driver": "Driver",
+      "customers": "Customers"
+    },
+    "overview": {
+      "totalBookings": "Total Bookings",
+      "totalRevenue": "Total Revenue",
+      "totalVehicles": "Total Fleet",
+      "totalDrivers": "Total Drivers",
+      "totalRoutes": "Total Routes",
+      "totalCustomers": "Total Customers",
+      "activeSchedules": "Active Schedules",
+      "bookingsByStatus": "Bookings by Status"
+    },
+    "sales": {
+      "totalBookings": "Total Bookings",
+      "totalRevenue": "Total Revenue",
+      "totalSeats": "Total Seats Sold",
+      "averagePrice": "Average Price",
+      "dailyTrend": "Daily Sales Trend",
+      "date": "Date",
+      "bookings": "Bookings",
+      "seats": "Seats",
+      "revenue": "Revenue"
+    },
+    "route": {
+      "title": "Revenue per Route",
+      "route": "Route",
+      "bookings": "Bookings",
+      "seats": "Seats",
+      "revenue": "Revenue"
+    },
+    "vehicle": {
+      "title": "Fleet Utilization",
+      "vehicle": "Vehicle",
+      "trips": "Trips",
+      "capacity": "Capacity",
+      "filled": "Filled",
+      "utilization": "Utilization",
+      "revenue": "Revenue"
+    },
+    "driver": {
+      "title": "Driver Performance",
+      "driver": "Driver",
+      "totalTrips": "Total Trips",
+      "totalPassengers": "Total Passengers",
+      "averagePerTrip": "Average/Trip",
+      "revenue": "Revenue"
+    },
+    "customers": {
+      "title": "Top 10 Customers",
+      "rank": "Rank",
+      "customer": "Customer",
+      "totalBookings": "Total Bookings",
+      "totalSpending": "Total Spending",
+      "average": "Average",
+      "lastBooking": "Last Booking"
+    }
+  },
+  "checkIn": {
+    "title": "Passenger Check-In",
+    "subtitle": "Manage passenger check-in for each departure schedule",
+    "filterDate": "Filter Date:",
+    "reset": "Reset",
+    "scheduleList": "Schedule List",
+    "loading": "Loading...",
+    "noSchedule": "No schedule available",
+    "selectSchedule": "Select Schedule",
+    "selectScheduleDesc": "Select a schedule to view booking list",
+    "totalBookings": "Total Bookings",
+    "checkedIn": "Checked In",
+    "notCheckedIn": "Not Checked In",
+    "totalSeats": "Total Seats",
+    "filterStatus": "Filter Status:",
+    "all": "All",
+    "alreadyCheckedIn": "Already Checked In",
+    "notYetCheckedIn": "Not Yet Checked In",
+    "checkInAll": "Check-In All",
+    "loadingData": "Loading data...",
+    "booking": "Booking",
+    "passenger": "Passenger",
+    "seats": "Seats",
+    "status": "Status",
+    "checkInTime": "Check-In Time",
+    "actions": "Actions",
+    "noBooking": "No bookings available",
+    "checkIn": "Check-In",
+    "undo": "Undo",
+    "checkInSuccess": "Check-in successful!",
+    "checkInError": "Failed to perform check-in",
+    "undoSuccess": "Check-in cancelled successfully",
+    "undoError": "Failed to cancel check-in",
+    "undoConfirm": "Are you sure you want to cancel this check-in?",
+    "bulkCheckInConfirm": "Are you sure you want to check-in all unchecked bookings?",
+    "bulkCheckInError": "Failed to perform bulk check-in",
+    "loadScheduleError": "Failed to load schedule data",
+    "loadBookingError": "Failed to load booking data"
   }
 }

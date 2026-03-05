@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import Pagination from '../components/Pagination';
 
 function Laporan() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState('');
@@ -74,7 +76,7 @@ function Laporan() {
           break;
       }
     } catch (err) {
-      setError('Gagal mengambil data laporan');
+      setError(t('reports.loadError'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -97,7 +99,7 @@ function Laporan() {
       link.click();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      setError('Gagal export laporan');
+      setError(t('reports.exportError'));
       console.error(err);
     }
   };
@@ -119,20 +121,20 @@ function Laporan() {
   };
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: '📊' },
-    { id: 'sales', label: 'Penjualan', icon: '💰' },
-    { id: 'route', label: 'Per Rute', icon: '🗺️' },
-    { id: 'vehicle', label: 'Armada', icon: '🚐' },
-    { id: 'driver', label: 'Driver', icon: '👨‍✈️' },
-    { id: 'customers', label: 'Pelanggan', icon: '👥' }
+    { id: 'overview', label: t('reports.tabs.overview'), icon: '📊' },
+    { id: 'sales', label: t('reports.tabs.sales'), icon: '💰' },
+    { id: 'route', label: t('reports.tabs.route'), icon: '🗺️' },
+    { id: 'vehicle', label: t('reports.tabs.vehicle'), icon: '🚐' },
+    { id: 'driver', label: t('reports.tabs.driver'), icon: '👨‍✈️' },
+    { id: 'customers', label: t('reports.tabs.customers'), icon: '👥' }
   ];
 
   return (
     <div>
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Laporan</h1>
-        <p className="text-gray-600 mt-1">Analisis dan pelaporan data bisnis</p>
+        <h1 className="text-2xl font-bold text-gray-800">{t('reports.title')}</h1>
+        <p className="text-gray-600 mt-1">{t('reports.subtitle')}</p>
       </div>
 
       {/* Date Range Filter */}
@@ -140,7 +142,7 @@ function Laporan() {
         <div className="flex flex-wrap items-center gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tanggal Mulai
+              {t('reports.startDate')}
             </label>
             <input
               type="date"
@@ -151,7 +153,7 @@ function Laporan() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tanggal Akhir
+              {t('reports.endDate')}
             </label>
             <input
               type="date"
@@ -166,7 +168,7 @@ function Laporan() {
               onClick={() => setActiveTab(activeTab)}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
-              Refresh Data
+              {t('reports.refreshData')}
             </button>
           </div>
         </div>
@@ -203,7 +205,7 @@ function Laporan() {
       {loading ? (
         <div className="bg-white rounded-xl shadow-md p-12 text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="text-gray-600 mt-4">Memuat data laporan...</p>
+          <p className="text-gray-600 mt-4">{t('reports.loadingData')}</p>
         </div>
       ) : (
         <>
@@ -214,42 +216,42 @@ function Laporan() {
                 <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md p-6 text-white">
                   <div className="text-3xl mb-2">🎫</div>
                   <div className="text-2xl font-bold">{overview.totalBookings}</div>
-                  <div className="text-sm opacity-90">Total Booking</div>
+                  <div className="text-sm opacity-90">{t('reports.overview.totalBookings')}</div>
                 </div>
                 <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-md p-6 text-white">
                   <div className="text-3xl mb-2">💰</div>
                   <div className="text-2xl font-bold">{formatCurrency(overview.totalRevenue)}</div>
-                  <div className="text-sm opacity-90">Total Pendapatan</div>
+                  <div className="text-sm opacity-90">{t('reports.overview.totalRevenue')}</div>
                 </div>
                 <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-md p-6 text-white">
                   <div className="text-3xl mb-2">🚐</div>
                   <div className="text-2xl font-bold">{overview.totalVehicles}</div>
-                  <div className="text-sm opacity-90">Total Armada</div>
+                  <div className="text-sm opacity-90">{t('reports.overview.totalVehicles')}</div>
                 </div>
                 <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-md p-6 text-white">
                   <div className="text-3xl mb-2">👨‍✈️</div>
                   <div className="text-2xl font-bold">{overview.totalDrivers}</div>
-                  <div className="text-sm opacity-90">Total Driver</div>
+                  <div className="text-sm opacity-90">{t('reports.overview.totalDrivers')}</div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="text-lg font-bold text-gray-800 mb-2">📍 Total Rute</div>
+                  <div className="text-lg font-bold text-gray-800 mb-2">📍 {t('reports.overview.totalRoutes')}</div>
                   <div className="text-3xl font-bold text-blue-600">{overview.totalRoutes}</div>
                 </div>
                 <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="text-lg font-bold text-gray-800 mb-2">👥 Total Customer</div>
+                  <div className="text-lg font-bold text-gray-800 mb-2">👥 {t('reports.overview.totalCustomers')}</div>
                   <div className="text-3xl font-bold text-green-600">{overview.totalCustomers}</div>
                 </div>
                 <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="text-lg font-bold text-gray-800 mb-2">📅 Jadwal Aktif</div>
+                  <div className="text-lg font-bold text-gray-800 mb-2">📅 {t('reports.overview.activeSchedules')}</div>
                   <div className="text-3xl font-bold text-purple-600">{overview.activeSchedules}</div>
                 </div>
               </div>
 
               <div className="bg-white rounded-xl shadow-md p-6">
-                <h2 className="text-lg font-bold text-gray-800 mb-4">Booking per Status</h2>
+                <h2 className="text-lg font-bold text-gray-800 mb-4">{t('reports.overview.bookingsByStatus')}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   {overview.bookingsByStatus.map((item) => (
                     <div key={item.status} className="border border-gray-200 rounded-lg p-4">
@@ -268,41 +270,41 @@ function Laporan() {
             <div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                 <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="text-sm text-gray-600 mb-1">Total Booking</div>
+                  <div className="text-sm text-gray-600 mb-1">{t('reports.sales.totalBookings')}</div>
                   <div className="text-2xl font-bold text-gray-800">{salesReport.summary.totalBookings}</div>
                 </div>
                 <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="text-sm text-gray-600 mb-1">Total Pendapatan</div>
+                  <div className="text-sm text-gray-600 mb-1">{t('reports.sales.totalRevenue')}</div>
                   <div className="text-2xl font-bold text-green-600">{formatCurrency(salesReport.summary.totalRevenue)}</div>
                 </div>
                 <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="text-sm text-gray-600 mb-1">Total Kursi Terjual</div>
+                  <div className="text-sm text-gray-600 mb-1">{t('reports.sales.totalSeats')}</div>
                   <div className="text-2xl font-bold text-blue-600">{salesReport.summary.totalSeats}</div>
                 </div>
                 <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="text-sm text-gray-600 mb-1">Rata-rata Harga</div>
+                  <div className="text-sm text-gray-600 mb-1">{t('reports.sales.averagePrice')}</div>
                   <div className="text-2xl font-bold text-purple-600">{formatCurrency(salesReport.summary.averagePrice)}</div>
                 </div>
               </div>
 
               <div className="bg-white rounded-xl shadow-md p-6 mb-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-bold text-gray-800">Tren Penjualan Harian</h2>
+                  <h2 className="text-lg font-bold text-gray-800">{t('reports.sales.dailyTrend')}</h2>
                   <button
                     onClick={() => handleExport('sales')}
                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
                   >
-                    📥 Export
+                    📥 {t('reports.export')}
                   </button>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-gray-50 border-b border-gray-200">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Booking</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kursi</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pendapatan</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.sales.date')}</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.sales.bookings')}</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.sales.seats')}</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.sales.revenue')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -333,22 +335,22 @@ function Laporan() {
           {activeTab === 'route' && (
             <div className="bg-white rounded-xl shadow-md p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold text-gray-800">Pendapatan per Rute</h2>
+                <h2 className="text-lg font-bold text-gray-800">{t('reports.route.title')}</h2>
                 <button
                   onClick={() => handleExport('route')}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
                 >
-                  📥 Export
+                  📥 {t('reports.export')}
                 </button>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rute</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Booking</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kursi</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pendapatan</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.route.route')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.route.bookings')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.route.seats')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.route.revenue')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -381,24 +383,24 @@ function Laporan() {
           {activeTab === 'vehicle' && (
             <div className="bg-white rounded-xl shadow-md p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold text-gray-800">Utilisasi Armada</h2>
+                <h2 className="text-lg font-bold text-gray-800">{t('reports.vehicle.title')}</h2>
                 <button
                   onClick={() => handleExport('vehicle')}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
                 >
-                  📥 Export
+                  📥 {t('reports.export')}
                 </button>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kendaraan</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trip</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kapasitas</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Terisi</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Utilisasi</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pendapatan</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.vehicle.vehicle')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.vehicle.trips')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.vehicle.capacity')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.vehicle.filled')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.vehicle.utilization')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.vehicle.revenue')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -446,23 +448,23 @@ function Laporan() {
           {activeTab === 'driver' && (
             <div className="bg-white rounded-xl shadow-md p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold text-gray-800">Kinerja Driver</h2>
+                <h2 className="text-lg font-bold text-gray-800">{t('reports.driver.title')}</h2>
                 <button
                   onClick={() => handleExport('driver')}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
                 >
-                  📥 Export
+                  📥 {t('reports.export')}
                 </button>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Driver</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Trip</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Penumpang</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rata-rata/Trip</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pendapatan</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.driver.driver')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.driver.totalTrips')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.driver.totalPassengers')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.driver.averagePerTrip')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.driver.revenue')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -495,17 +497,17 @@ function Laporan() {
           {/* Top Customers Tab */}
           {activeTab === 'customers' && (
             <div className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="text-lg font-bold text-gray-800 mb-4">Top 10 Pelanggan</h2>
+              <h2 className="text-lg font-bold text-gray-800 mb-4">{t('reports.customers.title')}</h2>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rank</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pelanggan</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Booking</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Spending</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rata-rata</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Booking Terakhir</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.customers.rank')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.customers.customer')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.customers.totalBookings')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.customers.totalSpending')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.customers.average')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('reports.customers.lastBooking')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">

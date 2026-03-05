@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import Pagination from '../components/Pagination';
 
 function CheckIn() {
+  const { t } = useTranslation();
   const [schedules, setSchedules] = useState([]);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [bookings, setBookings] = useState([]);
@@ -39,7 +41,7 @@ function CheckIn() {
         setSelectedSchedule(response.data.data[0]);
       }
     } catch (err) {
-      setError('Gagal mengambil data jadwal');
+      setError(t('checkIn.loadScheduleError'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -59,7 +61,7 @@ function CheckIn() {
       setStats(response.data.stats);
       setError('');
     } catch (err) {
-      setError('Gagal mengambil data booking');
+      setError(t('checkIn.loadBookingError'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -69,7 +71,7 @@ function CheckIn() {
   const handleCheckIn = async (bookingId) => {
     try {
       const response = await api.post(`/checkin/bookings/${bookingId}/checkin`);
-      setSuccess('Check-in berhasil!');
+      setSuccess(t('checkIn.checkInSuccess'));
       setTimeout(() => setSuccess(''), 3000);
       
       // Refresh bookings
@@ -78,17 +80,17 @@ function CheckIn() {
         fetchSchedules(); // Refresh schedule stats
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal melakukan check-in');
+      setError(err.response?.data?.message || t('checkIn.checkInError'));
       setTimeout(() => setError(''), 5000);
     }
   };
 
   const handleUndoCheckIn = async (bookingId) => {
-    if (!confirm('Yakin ingin membatalkan check-in ini?')) return;
+    if (!confirm(t('checkIn.undoConfirm'))) return;
     
     try {
       await api.post(`/checkin/bookings/${bookingId}/undo`);
-      setSuccess('Check-in berhasil dibatalkan');
+      setSuccess(t('checkIn.undoSuccess'));
       setTimeout(() => setSuccess(''), 3000);
       
       // Refresh bookings
@@ -97,13 +99,13 @@ function CheckIn() {
         fetchSchedules();
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal membatalkan check-in');
+      setError(err.response?.data?.message || t('checkIn.undoError'));
       setTimeout(() => setError(''), 5000);
     }
   };
 
   const handleBulkCheckIn = async () => {
-    if (!confirm('Yakin ingin check-in semua booking yang belum di-check in?')) return;
+    if (!confirm(t('checkIn.bulkCheckInConfirm'))) return;
     
     try {
       const response = await api.post(`/checkin/schedules/${selectedSchedule.id}/bulk-checkin`);
@@ -114,7 +116,7 @@ function CheckIn() {
       fetchScheduleBookings(selectedSchedule.id);
       fetchSchedules();
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal melakukan bulk check-in');
+      setError(err.response?.data?.message || t('checkIn.bulkCheckInError'));
       setTimeout(() => setError(''), 5000);
     }
   };
@@ -142,8 +144,8 @@ function CheckIn() {
     <div>
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Check-In Penumpang</h1>
-        <p className="text-gray-600 mt-1">Kelola check-in penumpang untuk setiap jadwal keberangkatan</p>
+        <h1 className="text-2xl font-bold text-gray-800">{t('checkIn.title')}</h1>
+        <p className="text-gray-600 mt-1">{t('checkIn.subtitle')}</p>
       </div>
 
       {/* Alert Messages */}
@@ -162,7 +164,7 @@ function CheckIn() {
       <div className="bg-white rounded-lg shadow-md p-4 mb-6">
         <div className="flex items-center gap-4">
           <label className="text-sm font-medium text-gray-700">
-            Filter Tanggal:
+            {t('checkIn.filterDate')}
           </label>
           <input
             type="date"
@@ -174,7 +176,7 @@ function CheckIn() {
             onClick={() => setFilterDate('')}
             className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
           >
-            Reset
+            {t('checkIn.reset')}
           </button>
         </div>
       </div>
@@ -183,16 +185,16 @@ function CheckIn() {
         {/* Schedule List */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-xl shadow-md p-4">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">Daftar Jadwal</h2>
+            <h2 className="text-lg font-bold text-gray-800 mb-4">{t('checkIn.scheduleList')}</h2>
             
             {loading && !selectedSchedule ? (
               <div className="text-center py-8">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p className="text-gray-600 mt-2">Memuat...</p>
+                <p className="text-gray-600 mt-2">{t('checkIn.loading')}</p>
               </div>
             ) : schedules.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                Tidak ada jadwal
+                {t('checkIn.noSchedule')}
               </div>
             ) : (
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
@@ -223,7 +225,7 @@ function CheckIn() {
                         ⏳ {schedule.bookingStats.pending}
                       </span>
                       <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-800">
-                        Total: {schedule.bookingStats.total}
+                        {t('common.total')}: {schedule.bookingStats.total}
                       </span>
                     </div>
                   </div>
@@ -238,8 +240,8 @@ function CheckIn() {
           {!selectedSchedule ? (
             <div className="bg-white rounded-xl shadow-md p-12 text-center">
               <div className="text-6xl mb-4">📋</div>
-              <h2 className="text-xl font-bold text-gray-800 mb-2">Pilih Jadwal</h2>
-              <p className="text-gray-600">Pilih jadwal untuk melihat daftar booking</p>
+              <h2 className="text-xl font-bold text-gray-800 mb-2">{t('checkIn.selectSchedule')}</h2>
+              <p className="text-gray-600">{t('checkIn.selectScheduleDesc')}</p>
             </div>
           ) : (
             <>
@@ -247,19 +249,19 @@ function CheckIn() {
               {stats && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   <div className="bg-white rounded-lg shadow-md p-4">
-                    <div className="text-sm text-gray-600 mb-1">Total Booking</div>
+                    <div className="text-sm text-gray-600 mb-1">{t('checkIn.totalBookings')}</div>
                     <div className="text-2xl font-bold text-gray-800">{stats.total}</div>
                   </div>
                   <div className="bg-white rounded-lg shadow-md p-4">
-                    <div className="text-sm text-gray-600 mb-1">Sudah Check-In</div>
+                    <div className="text-sm text-gray-600 mb-1">{t('checkIn.checkedIn')}</div>
                     <div className="text-2xl font-bold text-green-600">{stats.checkedIn}</div>
                   </div>
                   <div className="bg-white rounded-lg shadow-md p-4">
-                    <div className="text-sm text-gray-600 mb-1">Belum Check-In</div>
+                    <div className="text-sm text-gray-600 mb-1">{t('checkIn.notCheckedIn')}</div>
                     <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
                   </div>
                   <div className="bg-white rounded-lg shadow-md p-4">
-                    <div className="text-sm text-gray-600 mb-1">Total Kursi</div>
+                    <div className="text-sm text-gray-600 mb-1">{t('checkIn.totalSeats')}</div>
                     <div className="text-2xl font-bold text-blue-600">
                       {stats.checkedInSeats}/{stats.totalSeats}
                     </div>
@@ -271,16 +273,16 @@ function CheckIn() {
               <div className="bg-white rounded-lg shadow-md p-4 mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <label className="text-sm font-medium text-gray-700">
-                    Filter Status:
+                    {t('checkIn.filterStatus')}
                   </label>
                   <select
                     value={filterCheckedIn}
                     onChange={(e) => setFilterCheckedIn(e.target.value)}
                     className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   >
-                    <option value="all">Semua</option>
-                    <option value="true">Sudah Check-In</option>
-                    <option value="false">Belum Check-In</option>
+                    <option value="all">{t('checkIn.all')}</option>
+                    <option value="true">{t('checkIn.alreadyCheckedIn')}</option>
+                    <option value="false">{t('checkIn.notYetCheckedIn')}</option>
                   </select>
                 </div>
                 {stats && stats.pending > 0 && (
@@ -288,7 +290,7 @@ function CheckIn() {
                     onClick={handleBulkCheckIn}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                   >
-                    Check-In Semua ({stats.pending})
+                    {t('checkIn.checkInAll')} ({stats.pending})
                   </button>
                 )}
               </div>
@@ -298,7 +300,7 @@ function CheckIn() {
                 {loading ? (
                   <div className="text-center py-12">
                     <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    <p className="text-gray-600 mt-2">Memuat data...</p>
+                    <p className="text-gray-600 mt-2">{t('checkIn.loadingData')}</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
@@ -306,22 +308,22 @@ function CheckIn() {
                       <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Booking
+                            {t('checkIn.booking')}
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Penumpang
+                            {t('checkIn.passenger')}
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Kursi
+                            {t('checkIn.seats')}
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
+                            {t('checkIn.status')}
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Waktu Check-In
+                            {t('checkIn.checkInTime')}
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Aksi
+                            {t('checkIn.actions')}
                           </th>
                         </tr>
                       </thead>
@@ -329,7 +331,7 @@ function CheckIn() {
                         {bookings.length === 0 ? (
                           <tr>
                             <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
-                              Tidak ada booking
+                              {t('checkIn.noBooking')}
                             </td>
                           </tr>
                         ) : (
@@ -361,17 +363,17 @@ function CheckIn() {
                                   {booking.seatNumbers.join(', ')}
                                 </div>
                                 <div className="text-xs text-gray-500">
-                                  {booking.totalSeats} kursi
+                                  {booking.totalSeats} {t('schedule.seats')}
                                 </div>
                               </td>
                               <td className="px-6 py-4">
                                 {booking.checkedIn ? (
                                   <span className="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                    ✓ Sudah Check-In
+                                    ✓ {t('checkIn.checkedIn')}
                                   </span>
                                 ) : (
                                   <span className="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                    ⏳ Belum Check-In
+                                    ⏳ {t('checkIn.notCheckedIn')}
                                   </span>
                                 )}
                               </td>
@@ -384,14 +386,14 @@ function CheckIn() {
                                     onClick={() => handleUndoCheckIn(booking.id)}
                                     className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition"
                                   >
-                                    Batalkan
+                                    {t('checkIn.undo')}
                                   </button>
                                 ) : (
                                   <button
                                     onClick={() => handleCheckIn(booking.id)}
                                     className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition"
                                   >
-                                    Check-In
+                                    {t('checkIn.checkIn')}
                                   </button>
                                 )}
                               </td>

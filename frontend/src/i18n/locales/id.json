@@ -272,5 +272,117 @@
       "customer": "Customer",
       "activeUsers": "User Aktif"
     }
+  },
+  "reports": {
+    "title": "Laporan",
+    "subtitle": "Analisis dan pelaporan data bisnis",
+    "startDate": "Tanggal Mulai",
+    "endDate": "Tanggal Akhir",
+    "refreshData": "Refresh Data",
+    "loadError": "Gagal mengambil data laporan",
+    "exportError": "Gagal export laporan",
+    "loadingData": "Memuat data laporan...",
+    "export": "Export",
+    "tabs": {
+      "overview": "Overview",
+      "sales": "Penjualan",
+      "route": "Per Rute",
+      "vehicle": "Armada",
+      "driver": "Driver",
+      "customers": "Pelanggan"
+    },
+    "overview": {
+      "totalBookings": "Total Booking",
+      "totalRevenue": "Total Pendapatan",
+      "totalVehicles": "Total Armada",
+      "totalDrivers": "Total Driver",
+      "totalRoutes": "Total Rute",
+      "totalCustomers": "Total Customer",
+      "activeSchedules": "Jadwal Aktif",
+      "bookingsByStatus": "Booking per Status"
+    },
+    "sales": {
+      "totalBookings": "Total Booking",
+      "totalRevenue": "Total Pendapatan",
+      "totalSeats": "Total Kursi Terjual",
+      "averagePrice": "Rata-rata Harga",
+      "dailyTrend": "Tren Penjualan Harian",
+      "date": "Tanggal",
+      "bookings": "Booking",
+      "seats": "Kursi",
+      "revenue": "Pendapatan"
+    },
+    "route": {
+      "title": "Pendapatan per Rute",
+      "route": "Rute",
+      "bookings": "Booking",
+      "seats": "Kursi",
+      "revenue": "Pendapatan"
+    },
+    "vehicle": {
+      "title": "Utilisasi Armada",
+      "vehicle": "Kendaraan",
+      "trips": "Trip",
+      "capacity": "Kapasitas",
+      "filled": "Terisi",
+      "utilization": "Utilisasi",
+      "revenue": "Pendapatan"
+    },
+    "driver": {
+      "title": "Kinerja Driver",
+      "driver": "Driver",
+      "totalTrips": "Total Trip",
+      "totalPassengers": "Total Penumpang",
+      "averagePerTrip": "Rata-rata/Trip",
+      "revenue": "Pendapatan"
+    },
+    "customers": {
+      "title": "Top 10 Pelanggan",
+      "rank": "Rank",
+      "customer": "Pelanggan",
+      "totalBookings": "Total Booking",
+      "totalSpending": "Total Spending",
+      "average": "Rata-rata",
+      "lastBooking": "Booking Terakhir"
+    }
+  },
+  "checkIn": {
+    "title": "Check-In Penumpang",
+    "subtitle": "Kelola check-in penumpang untuk setiap jadwal keberangkatan",
+    "filterDate": "Filter Tanggal:",
+    "reset": "Reset",
+    "scheduleList": "Daftar Jadwal",
+    "loading": "Memuat...",
+    "noSchedule": "Tidak ada jadwal",
+    "selectSchedule": "Pilih Jadwal",
+    "selectScheduleDesc": "Pilih jadwal untuk melihat daftar booking",
+    "totalBookings": "Total Booking",
+    "checkedIn": "Sudah Check-In",
+    "notCheckedIn": "Belum Check-In",
+    "totalSeats": "Total Kursi",
+    "filterStatus": "Filter Status:",
+    "all": "Semua",
+    "alreadyCheckedIn": "Sudah Check-In",
+    "notYetCheckedIn": "Belum Check-In",
+    "checkInAll": "Check-In Semua",
+    "loadingData": "Memuat data...",
+    "booking": "Booking",
+    "passenger": "Penumpang",
+    "seats": "Kursi",
+    "status": "Status",
+    "checkInTime": "Waktu Check-In",
+    "actions": "Aksi",
+    "noBooking": "Tidak ada booking",
+    "checkIn": "Check-In",
+    "undo": "Batalkan",
+    "checkInSuccess": "Check-in berhasil!",
+    "checkInError": "Gagal melakukan check-in",
+    "undoSuccess": "Check-in berhasil dibatalkan",
+    "undoError": "Gagal membatalkan check-in",
+    "undoConfirm": "Yakin ingin membatalkan check-in ini?",
+    "bulkCheckInConfirm": "Yakin ingin check-in semua booking yang belum di-check in?",
+    "bulkCheckInError": "Gagal melakukan bulk check-in",
+    "loadScheduleError": "Gagal mengambil data jadwal",
+    "loadBookingError": "Gagal mengambil data booking"
   }
 }
