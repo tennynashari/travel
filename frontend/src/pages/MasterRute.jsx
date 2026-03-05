@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import Pagination from '../components/Pagination';
 
 function MasterRute() {
+  const { t } = useTranslation();
   const [routes, setRoutes] = useState([]);
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +34,7 @@ function MasterRute() {
       const response = await api.get('/routes');
       setRoutes(response.data.data);
     } catch (err) {
-      setError('Gagal mengambil data rute');
+      setError(t('masterRoute.loadError'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -96,10 +98,10 @@ function MasterRute() {
     try {
       if (editMode) {
         await api.put(`/routes/${currentRoute.id}`, currentRoute);
-        setSuccess('Rute berhasil diupdate');
+        setSuccess(t('masterRoute.updateSuccess'));
       } else {
         await api.post('/routes', currentRoute);
-        setSuccess('Rute berhasil ditambahkan');
+        setSuccess(t('masterRoute.addSuccess'));
       }
       
       fetchRoutes();
@@ -108,19 +110,19 @@ function MasterRute() {
         setSuccess('');
       }, 1500);
     } catch (err) {
-      setError(err.response?.data?.error || 'Gagal menyimpan data');
+      setError(err.response?.data?.error || t('masterRoute.saveError'));
     }
   };
 
   const handleDelete = async (id, routeName) => {
-    if (window.confirm(`Apakah Anda yakin ingin menghapus rute "${routeName}"?`)) {
+    if (window.confirm(t('masterRoute.deleteConfirm', { name: routeName }))) {
       try {
         await api.delete(`/routes/${id}`);
-        setSuccess('Rute berhasil dihapus');
+        setSuccess(t('masterRoute.deleteSuccess'));
         fetchRoutes();
         setTimeout(() => setSuccess(''), 3000);
       } catch (err) {
-        setError(err.response?.data?.error || 'Gagal menghapus rute');
+        setError(err.response?.data?.error || t('masterRoute.saveError'));
         setTimeout(() => setError(''), 3000);
       }
     }
@@ -145,8 +147,8 @@ function MasterRute() {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Master Rute</h1>
-          <p className="text-gray-600 mt-1">Kelola rute perjalanan antar kota</p>
+          <h1 className="text-2xl font-bold text-gray-800">{t('masterRoute.title')}</h1>
+          <p className="text-gray-600 mt-1">{t('masterRoute.subtitle')}</p>
         </div>
         <button
           onClick={() => handleOpenModal()}
@@ -155,7 +157,7 @@ function MasterRute() {
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          Tambah Rute
+          {t('masterRoute.addRoute')}
         </button>
       </div>
 
@@ -176,7 +178,7 @@ function MasterRute() {
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="text-gray-600 mt-2">Memuat data...</p>
+            <p className="text-gray-600 mt-2">{t('common.loading')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -184,22 +186,22 @@ function MasterRute() {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    No
+                    {t('masterRoute.number')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Rute
+                    {t('dashboard.route')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Jarak
+                    {t('masterRoute.distance')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Est. Waktu
+                    {t('masterRoute.estimatedTime')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Harga Dasar
+                    {t('masterRoute.basePrice')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Aksi
+                    {t('common.actions')}
                   </th>
                 </tr>
               </thead>
@@ -207,7 +209,7 @@ function MasterRute() {
                 {routes.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
-                      Belum ada data rute
+                      {t('common.noData')}
                     </td>
                   </tr>
                 ) : (
@@ -237,13 +239,13 @@ function MasterRute() {
                             onClick={() => handleOpenModal(route)}
                             className="text-blue-600 hover:text-blue-800 font-medium"
                           >
-                            Edit
+                            {t('common.edit')}
                           </button>
                           <button
                             onClick={() => handleDelete(route.id, `${route.originCity.name} - ${route.destinationCity.name}`)}
                             className="text-red-600 hover:text-red-800 font-medium"
                           >
-                            Hapus
+                            {t('common.delete')}
                           </button>
                         </div>
                       </td>
@@ -270,7 +272,7 @@ function MasterRute() {
           <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-xl font-bold text-gray-800">
-                {editMode ? 'Edit Rute' : 'Tambah Rute'}
+                {editMode ? t('masterRoute.editRoute') : t('masterRoute.addRoute')}
               </h2>
             </div>
 
@@ -284,7 +286,7 @@ function MasterRute() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Kota Asal *
+                    {t('masterRoute.originCity')} *
                   </label>
                   <select
                     value={currentRoute.originCityId}
@@ -292,7 +294,7 @@ function MasterRute() {
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   >
-                    <option value="">Pilih Kota Asal</option>
+                    <option value="">{t('masterRoute.selectOrigin')}</option>
                     {cities.map((city) => (
                       <option key={city.id} value={city.id}>
                         {city.name} ({city.province})
@@ -303,7 +305,7 @@ function MasterRute() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Kota Tujuan *
+                    {t('masterRoute.destinationCity')} *
                   </label>
                   <select
                     value={currentRoute.destinationCityId}
@@ -311,7 +313,7 @@ function MasterRute() {
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   >
-                    <option value="">Pilih Kota Tujuan</option>
+                    <option value="">{t('masterRoute.selectDestination')}</option>
                     {cities.map((city) => (
                       <option key={city.id} value={city.id}>
                         {city.name} ({city.province})
@@ -322,7 +324,7 @@ function MasterRute() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Jarak (km) *
+                    {t('masterRoute.distance')} *
                   </label>
                   <input
                     type="number"
@@ -331,13 +333,13 @@ function MasterRute() {
                     required
                     min="1"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    placeholder="Contoh: 150"
+                    placeholder="150"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Estimasi Waktu (menit) *
+                    {t('masterRoute.estimatedTime')} *
                   </label>
                   <input
                     type="number"
@@ -346,13 +348,13 @@ function MasterRute() {
                     required
                     min="1"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    placeholder="Contoh: 180 (3 jam)"
+                    placeholder="180"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Harga Dasar (Rp) *
+                    {t('masterRoute.basePrice')} (Rp) *
                   </label>
                   <input
                     type="number"
@@ -362,7 +364,7 @@ function MasterRute() {
                     min="1000"
                     step="1000"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    placeholder="Contoh: 100000"
+                    placeholder="100000"
                   />
                 </div>
               </div>
@@ -373,13 +375,13 @@ function MasterRute() {
                   onClick={handleCloseModal}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
                 >
-                  Batal
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                 >
-                  {editMode ? 'Update' : 'Simpan'}
+                  {editMode ? t('common.edit') : t('common.save')}
                 </button>
               </div>
             </form>

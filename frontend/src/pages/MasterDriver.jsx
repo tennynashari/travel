@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import Pagination from '../components/Pagination';
 
 function MasterDriver() {
+  const { t } = useTranslation();
   const [drivers, setDrivers] = useState([]);
   const [availableUsers, setAvailableUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +31,7 @@ function MasterDriver() {
       const response = await api.get('/drivers');
       setDrivers(response.data.data);
     } catch (err) {
-      setError('Gagal mengambil data driver');
+      setError(t('masterDriver.loadError'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -91,10 +93,10 @@ function MasterDriver() {
           licenseNumber: currentDriver.licenseNumber,
           status: currentDriver.status
         });
-        setSuccess('Driver berhasil diupdate');
+        setSuccess(t('masterDriver.updateSuccess'));
       } else {
         await api.post('/drivers', currentDriver);
-        setSuccess('Driver berhasil ditambahkan');
+        setSuccess(t('masterDriver.addSuccess'));
       }
       
       fetchDrivers();
@@ -103,19 +105,19 @@ function MasterDriver() {
         setSuccess('');
       }, 1500);
     } catch (err) {
-      setError(err.response?.data?.error || 'Gagal menyimpan data');
+      setError(err.response?.data?.error || t('masterDriver.saveError'));
     }
   };
 
   const handleDelete = async (id, name) => {
-    if (window.confirm(`Apakah Anda yakin ingin menghapus driver "${name}"?`)) {
+    if (window.confirm(t('masterDriver.deleteConfirm', { name }))) {
       try {
         await api.delete(`/drivers/${id}`);
-        setSuccess('Driver berhasil dihapus');
+        setSuccess(t('masterDriver.deleteSuccess'));
         fetchDrivers();
         setTimeout(() => setSuccess(''), 3000);
       } catch (err) {
-        setError(err.response?.data?.error || 'Gagal menghapus driver');
+        setError(err.response?.data?.error || t('masterDriver.saveError'));
         setTimeout(() => setError(''), 3000);
       }
     }
@@ -131,12 +133,7 @@ function MasterDriver() {
   };
 
   const getStatusLabel = (status) => {
-    const labels = {
-      ACTIVE: 'Aktif',
-      OFF_DUTY: 'Off Duty',
-      INACTIVE: 'Tidak Aktif'
-    };
-    return labels[status] || status;
+    return t(`masterDriver.status.${status}`);
   };
 
   return (
@@ -144,8 +141,8 @@ function MasterDriver() {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Master Driver</h1>
-          <p className="text-gray-600 mt-1">Kelola data driver travel</p>
+          <h1 className="text-2xl font-bold text-gray-800">{t('masterDriver.title')}</h1>
+          <p className="text-gray-600 mt-1">{t('masterDriver.subtitle')}</p>
         </div>
         <button
           onClick={() => handleOpenModal()}
@@ -154,7 +151,7 @@ function MasterDriver() {
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          Tambah Driver
+          {t('masterDriver.addDriver')}
         </button>
       </div>
 
@@ -175,7 +172,7 @@ function MasterDriver() {
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="text-gray-600 mt-2">Memuat data...</p>
+            <p className="text-gray-600 mt-2">{t('common.loading')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -183,22 +180,22 @@ function MasterDriver() {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    No
+                    {t('masterDriver.number')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Nama Driver
+                    {t('masterDriver.driverName')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email / Telepon
+                    Email / {t('userManagement.table.phone')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    No. SIM
+                    {t('masterDriver.licenseNumber')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    {t('common.status')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Aksi
+                    {t('common.actions')}
                   </th>
                 </tr>
               </thead>
@@ -206,7 +203,7 @@ function MasterDriver() {
                 {drivers.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
-                      Belum ada data driver
+                      {t('common.noData')}
                     </td>
                   </tr>
                 ) : (
@@ -239,13 +236,13 @@ function MasterDriver() {
                             onClick={() => handleOpenModal(driver)}
                             className="text-blue-600 hover:text-blue-800 font-medium"
                           >
-                            Edit
+                            {t('common.edit')}
                           </button>
                           <button
                             onClick={() => handleDelete(driver.id, driver.user.name)}
                             className="text-red-600 hover:text-red-800 font-medium"
                           >
-                            Hapus
+                            {t('common.delete')}
                           </button>
                         </div>
                       </td>
@@ -272,7 +269,7 @@ function MasterDriver() {
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-xl font-bold text-gray-800">
-                {editMode ? 'Edit Driver' : 'Tambah Driver'}
+                {editMode ? t('masterDriver.editDriver') : t('masterDriver.addDriver')}
               </h2>
             </div>
 
@@ -287,7 +284,7 @@ function MasterDriver() {
                 {!editMode && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Pilih User *
+                      {t('masterDriver.selectUser')} *
                     </label>
                     <select
                       value={currentDriver.userId}
@@ -295,7 +292,7 @@ function MasterDriver() {
                       required
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                     >
-                      <option value="">Pilih User dengan Role Driver</option>
+                      <option value="">{t('masterDriver.selectUser')}</option>
                       {availableUsers.map((user) => (
                         <option key={user.id} value={user.id}>
                           {user.name} ({user.email})
@@ -310,7 +307,7 @@ function MasterDriver() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nomor SIM *
+                    {t('masterDriver.licenseNumber')} *
                   </label>
                   <input
                     type="text"
@@ -318,13 +315,13 @@ function MasterDriver() {
                     onChange={(e) => setCurrentDriver({ ...currentDriver, licenseNumber: e.target.value })}
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    placeholder="Contoh: SIM-123456789"
+                    placeholder={t('masterDriver.enterLicense')}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status *
+                    {t('common.status')} *
                   </label>
                   <select
                     value={currentDriver.status}
@@ -332,9 +329,9 @@ function MasterDriver() {
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   >
-                    <option value="ACTIVE">Aktif</option>
-                    <option value="OFF_DUTY">Off Duty</option>
-                    <option value="INACTIVE">Tidak Aktif</option>
+                    <option value="ACTIVE">{t('masterDriver.status.ACTIVE')}</option>
+                    <option value="OFF_DUTY">{t('masterDriver.status.OFF_DUTY')}</option>
+                    <option value="INACTIVE">{t('masterDriver.status.INACTIVE')}</option>
                   </select>
                 </div>
               </div>
@@ -345,13 +342,13 @@ function MasterDriver() {
                   onClick={handleCloseModal}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
                 >
-                  Batal
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                 >
-                  {editMode ? 'Update' : 'Simpan'}
+                  {editMode ? t('common.edit') : t('common.save')}
                 </button>
               </div>
             </form>

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import Pagination from '../components/Pagination';
 
 function MasterKota() {
+  const { t } = useTranslation();
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -23,7 +25,7 @@ function MasterKota() {
       const response = await api.get('/cities');
       setCities(response.data.data);
     } catch (err) {
-      setError('Gagal mengambil data kota');
+      setError(t('masterCity.loadError'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -60,13 +62,13 @@ function MasterKota() {
           name: currentCity.name,
           province: currentCity.province
         });
-        setSuccess('Kota berhasil diupdate');
+        setSuccess(t('masterCity.updateSuccess'));
       } else {
         await api.post('/cities', {
           name: currentCity.name,
           province: currentCity.province
         });
-        setSuccess('Kota berhasil ditambahkan');
+        setSuccess(t('masterCity.addSuccess'));
       }
       
       fetchCities();
@@ -75,19 +77,19 @@ function MasterKota() {
         setSuccess('');
       }, 1500);
     } catch (err) {
-      setError(err.response?.data?.error || 'Gagal menyimpan data');
+      setError(err.response?.data?.error || t('masterCity.saveError'));
     }
   };
 
   const handleDelete = async (id, name) => {
-    if (window.confirm(`Apakah Anda yakin ingin menghapus kota "${name}"?`)) {
+    if (window.confirm(t('masterCity.deleteConfirm', { name }))) {
       try {
         await api.delete(`/cities/${id}`);
-        setSuccess('Kota berhasil dihapus');
+        setSuccess(t('masterCity.deleteSuccess'));
         fetchCities();
         setTimeout(() => setSuccess(''), 3000);
       } catch (err) {
-        setError(err.response?.data?.error || 'Gagal menghapus kota');
+        setError(err.response?.data?.error || t('masterCity.saveError'));
         setTimeout(() => setError(''), 3000);
       }
     }
@@ -98,8 +100,8 @@ function MasterKota() {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Master Kota</h1>
-          <p className="text-gray-600 mt-1">Kelola data kota untuk rute perjalanan</p>
+          <h1 className="text-2xl font-bold text-gray-800">{t('masterCity.title')}</h1>
+          <p className="text-gray-600 mt-1">{t('masterCity.subtitle')}</p>
         </div>
         <button
           onClick={() => handleOpenModal()}
@@ -108,7 +110,7 @@ function MasterKota() {
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          Tambah Kota
+          {t('masterCity.addCity')}
         </button>
       </div>
 
@@ -129,7 +131,7 @@ function MasterKota() {
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="text-gray-600 mt-2">Memuat data...</p>
+            <p className="text-gray-600 mt-2">{t('common.loading')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -137,16 +139,16 @@ function MasterKota() {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    No
+                    {t('masterCity.number')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Nama Kota
+                    {t('masterCity.cityName')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Provinsi
+                    {t('masterCity.province')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Aksi
+                    {t('common.actions')}
                   </th>
                 </tr>
               </thead>
@@ -154,7 +156,7 @@ function MasterKota() {
                 {cities.length === 0 ? (
                   <tr>
                     <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
-                      Belum ada data kota
+                      {t('common.noData')}
                     </td>
                   </tr>
                 ) : (
@@ -169,13 +171,13 @@ function MasterKota() {
                             onClick={() => handleOpenModal(city)}
                             className="text-blue-600 hover:text-blue-800 font-medium"
                           >
-                            Edit
+                            {t('common.edit')}
                           </button>
                           <button
                             onClick={() => handleDelete(city.id, city.name)}
                             className="text-red-600 hover:text-red-800 font-medium"
                           >
-                            Hapus
+                            {t('common.delete')}
                           </button>
                         </div>
                       </td>
@@ -202,7 +204,7 @@ function MasterKota() {
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-xl font-bold text-gray-800">
-                {editMode ? 'Edit Kota' : 'Tambah Kota'}
+                {editMode ? t('masterCity.editCity') : t('masterCity.addCity')}
               </h2>
             </div>
 
@@ -216,7 +218,7 @@ function MasterKota() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nama Kota *
+                    {t('masterCity.cityName')} *
                   </label>
                   <input
                     type="text"
@@ -224,13 +226,13 @@ function MasterKota() {
                     onChange={(e) => setCurrentCity({ ...currentCity, name: e.target.value })}
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    placeholder="Contoh: Jakarta"
+                    placeholder={t('masterCity.enterCityName')}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Provinsi *
+                    {t('masterCity.province')} *
                   </label>
                   <input
                     type="text"
@@ -238,7 +240,7 @@ function MasterKota() {
                     onChange={(e) => setCurrentCity({ ...currentCity, province: e.target.value })}
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    placeholder="Contoh: DKI Jakarta"
+                    placeholder={t('masterCity.enterProvince')}
                   />
                 </div>
               </div>
@@ -249,13 +251,13 @@ function MasterKota() {
                   onClick={handleCloseModal}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
                 >
-                  Batal
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                 >
-                  {editMode ? 'Update' : 'Simpan'}
+                  {editMode ? t('common.edit') : t('common.save')}
                 </button>
               </div>
             </form>

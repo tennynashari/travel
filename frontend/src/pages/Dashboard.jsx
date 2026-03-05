@@ -128,10 +128,10 @@ function Dashboard({ user, page = 'dashboard' }) {
   };
 
   const stats = [
-    { label: 'Total Perjalanan', value: '12', icon: '🚐', color: 'bg-blue-50 text-blue-600' },
-    { label: 'Booking Hari Ini', value: '8', icon: '🎫', color: 'bg-green-50 text-green-600' },
-    { label: 'Armada Aktif', value: '5', icon: '🚗', color: 'bg-purple-50 text-purple-600' },
-    { label: 'Total Pendapatan', value: 'Rp 2.4M', icon: '💰', color: 'bg-yellow-50 text-yellow-600' }
+    { labelKey: 'dashboard.statistics.totalTrips', value: '12', icon: '🚐', color: 'bg-blue-50 text-blue-600' },
+    { labelKey: 'dashboard.statistics.bookingsToday', value: '8', icon: '🎫', color: 'bg-green-50 text-green-600' },
+    { labelKey: 'dashboard.statistics.activeVehicles', value: '5', icon: '🚗', color: 'bg-purple-50 text-purple-600' },
+    { labelKey: 'dashboard.statistics.totalRevenue', value: 'Rp 2.4M', icon: '💰', color: 'bg-yellow-50 text-yellow-600' }
   ];
 
   const recentBookings = [
@@ -332,7 +332,7 @@ function Dashboard({ user, page = 'dashboard' }) {
                         {stat.icon}
                       </div>
                     </div>
-                    <h3 className="text-gray-600 text-sm font-medium mb-1">{stat.label}</h3>
+                    <h3 className="text-gray-600 text-sm font-medium mb-1">{t(stat.labelKey)}</h3>
                     <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
                   </div>
                 ))}
@@ -341,9 +341,9 @@ function Dashboard({ user, page = 'dashboard' }) {
               {/* Recent Bookings */}
               <div className="bg-white rounded-xl shadow-md p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-800">Booking Terbaru</h2>
+                  <h2 className="text-xl font-bold text-gray-800">{t('dashboard.recentBookings')}</h2>
                   <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">
-                    Lihat Semua →
+                    {t('dashboard.viewAll')} →
                   </button>
                 </div>
 
@@ -352,16 +352,16 @@ function Dashboard({ user, page = 'dashboard' }) {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Kode Booking
+                          {t('dashboard.bookingCode')}
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Rute
+                          {t('dashboard.route')}
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Customer
+                          {t('dashboard.customer')}
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
+                          {t('common.status')}
                         </th>
                       </tr>
                     </thead>
@@ -399,8 +399,8 @@ function Dashboard({ user, page = 'dashboard' }) {
           {!['dashboard', 'kota', 'rute', 'armada', 'driver', 'jadwal', 'booking', 'pembayaran', 'checkin', 'laporan', 'users'].includes(activeMenu) && (
             <div className="bg-white rounded-xl shadow-md p-12 text-center">
               <div className="text-6xl mb-4">🚧</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Coming Soon</h2>
-              <p className="text-gray-600">Fitur ini sedang dalam pengembangan</p>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">{t('dashboard.comingSoon')}</h2>
+              <p className="text-gray-600">{t('dashboard.featureInDevelopment')}</p>
             </div>
           )}
         </main>

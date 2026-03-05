@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import Pagination from '../components/Pagination';
 
 function MasterArmada() {
+  const { t } = useTranslation();
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -29,7 +31,7 @@ function MasterArmada() {
       const response = await api.get('/vehicles');
       setVehicles(response.data.data);
     } catch (err) {
-      setError('Gagal mengambil data armada');
+      setError(t('masterVehicle.loadError'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -75,10 +77,10 @@ function MasterArmada() {
     try {
       if (editMode) {
         await api.put(`/vehicles/${currentVehicle.id}`, currentVehicle);
-        setSuccess('Armada berhasil diupdate');
+        setSuccess(t('masterVehicle.updateSuccess'));
       } else {
         await api.post('/vehicles', currentVehicle);
-        setSuccess('Armada berhasil ditambahkan');
+        setSuccess(t('masterVehicle.addSuccess'));
       }
       
       fetchVehicles();
@@ -87,19 +89,19 @@ function MasterArmada() {
         setSuccess('');
       }, 1500);
     } catch (err) {
-      setError(err.response?.data?.error || 'Gagal menyimpan data');
+      setError(err.response?.data?.error || t('masterVehicle.saveError'));
     }
   };
 
   const handleDelete = async (id, plateNumber) => {
-    if (window.confirm(`Apakah Anda yakin ingin menghapus armada "${plateNumber}"?`)) {
+    if (window.confirm(t('masterVehicle.deleteConfirm', { plate: plateNumber }))) {
       try {
         await api.delete(`/vehicles/${id}`);
-        setSuccess('Armada berhasil dihapus');
+        setSuccess(t('masterVehicle.deleteSuccess'));
         fetchVehicles();
         setTimeout(() => setSuccess(''), 3000);
       } catch (err) {
-        setError(err.response?.data?.error || 'Gagal menghapus armada');
+        setError(err.response?.data?.error || t('masterVehicle.saveError'));
         setTimeout(() => setError(''), 3000);
       }
     }
@@ -115,12 +117,7 @@ function MasterArmada() {
   };
 
   const getStatusLabel = (status) => {
-    const labels = {
-      ACTIVE: 'Aktif',
-      MAINTENANCE: 'Maintenance',
-      INACTIVE: 'Tidak Aktif'
-    };
-    return labels[status] || status;
+    return t(`masterVehicle.status.${status}`);
   };
 
   return (
@@ -128,8 +125,8 @@ function MasterArmada() {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Master Armada</h1>
-          <p className="text-gray-600 mt-1">Kelola kendaraan travel</p>
+          <h1 className="text-2xl font-bold text-gray-800">{t('masterVehicle.title')}</h1>
+          <p className="text-gray-600 mt-1">{t('masterVehicle.subtitle')}</p>
         </div>
         <button
           onClick={() => handleOpenModal()}
@@ -138,7 +135,7 @@ function MasterArmada() {
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          Tambah Armada
+          {t('masterVehicle.addVehicle')}
         </button>
       </div>
 
@@ -159,7 +156,7 @@ function MasterArmada() {
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="text-gray-600 mt-2">Memuat data...</p>
+            <p className="text-gray-600 mt-2">{t('common.loading')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -167,22 +164,22 @@ function MasterArmada() {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    No
+                    {t('masterVehicle.number')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Nomor Polisi
+                    {t('masterVehicle.plateNumber')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tipe Kendaraan
+                    {t('masterVehicle.vehicleType')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Kapasitas
+                    {t('masterVehicle.capacity')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    {t('common.status')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Aksi
+                    {t('common.actions')}
                   </th>
                 </tr>
               </thead>
@@ -190,7 +187,7 @@ function MasterArmada() {
                 {vehicles.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
-                      Belum ada data armada
+                      {t('common.noData')}
                     </td>
                   </tr>
                 ) : (
@@ -216,13 +213,13 @@ function MasterArmada() {
                             onClick={() => handleOpenModal(vehicle)}
                             className="text-blue-600 hover:text-blue-800 font-medium"
                           >
-                            Edit
+                            {t('common.edit')}
                           </button>
                           <button
                             onClick={() => handleDelete(vehicle.id, vehicle.plateNumber)}
                             className="text-red-600 hover:text-red-800 font-medium"
                           >
-                            Hapus
+                            {t('common.delete')}
                           </button>
                         </div>
                       </td>
@@ -249,7 +246,7 @@ function MasterArmada() {
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-xl font-bold text-gray-800">
-                {editMode ? 'Edit Armada' : 'Tambah Armada'}
+                {editMode ? t('masterVehicle.editVehicle') : t('masterVehicle.addVehicle')}
               </h2>
             </div>
 
@@ -263,7 +260,7 @@ function MasterArmada() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nomor Polisi *
+                    {t('masterVehicle.plateNumber')} *
                   </label>
                   <input
                     type="text"
@@ -271,13 +268,13 @@ function MasterArmada() {
                     onChange={(e) => setCurrentVehicle({ ...currentVehicle, plateNumber: e.target.value })}
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none uppercase"
-                    placeholder="Contoh: B-1234-XYZ"
+                    placeholder={t('masterVehicle.enterPlate')}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Tipe Kendaraan *
+                    {t('masterVehicle.vehicleType')} *
                   </label>
                   <select
                     value={currentVehicle.vehicleType}
@@ -285,7 +282,7 @@ function MasterArmada() {
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   >
-                    <option value="">Pilih Tipe</option>
+                    <option value="">{t('masterVehicle.vehicleType')}</option>
                     <option value="Hiace">Hiace</option>
                     <option value="Elf">Elf</option>
                     <option value="Avanza">Avanza</option>
@@ -297,7 +294,7 @@ function MasterArmada() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Kapasitas Kursi *
+                    {t('masterVehicle.capacity')} *
                   </label>
                   <input
                     type="number"
@@ -307,13 +304,13 @@ function MasterArmada() {
                     min="1"
                     max="60"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    placeholder="Contoh: 14"
+                    placeholder={t('masterVehicle.enterCapacity')}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status *
+                    {t('common.status')} *
                   </label>
                   <select
                     value={currentVehicle.status}
@@ -321,9 +318,9 @@ function MasterArmada() {
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   >
-                    <option value="ACTIVE">Aktif</option>
-                    <option value="MAINTENANCE">Maintenance</option>
-                    <option value="INACTIVE">Tidak Aktif</option>
+                    <option value="ACTIVE">{t('masterVehicle.status.ACTIVE')}</option>
+                    <option value="MAINTENANCE">{t('masterVehicle.status.MAINTENANCE')}</option>
+                    <option value="INACTIVE">{t('masterVehicle.status.INACTIVE')}</option>
                   </select>
                 </div>
               </div>
@@ -334,13 +331,13 @@ function MasterArmada() {
                   onClick={handleCloseModal}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
                 >
-                  Batal
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                 >
-                  {editMode ? 'Update' : 'Simpan'}
+                  {editMode ? t('common.edit') : t('common.save')}
                 </button>
               </div>
             </form>
