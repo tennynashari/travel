@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import Pagination from '../components/Pagination';
 
 function Pembayaran() {
+  const { t } = useTranslation();
   const [payments, setPayments] = useState([]);
   const [stats, setStats] = useState(null);
   const [dailyRevenue, setDailyRevenue] = useState([]);
@@ -33,7 +35,7 @@ function Pembayaran() {
       const response = await api.get('/payments', { params });
       setPayments(response.data.data);
     } catch (err) {
-      setError('Gagal mengambil data pembayaran');
+      setError(t('payment.loadError'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -91,11 +93,7 @@ function Pembayaran() {
   };
 
   const getStatusLabel = (status) => {
-    const labels = {
-      PAID: 'Sudah Bayar',
-      CONFIRMED: 'Terkonfirmasi'
-    };
-    return labels[status] || status;
+    return t(`booking.status.${status}`);
   };
 
   const handleResetFilter = () => {
@@ -108,8 +106,8 @@ function Pembayaran() {
     <div>
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Pembayaran</h1>
-        <p className="text-gray-600 mt-1">Kelola dan pantau pembayaran tiket</p>
+        <h1 className="text-2xl font-bold text-gray-800">{t('payment.title')}</h1>
+        <p className="text-gray-600 mt-1">{t('payment.subtitle')}</p>
       </div>
 
       {/* Statistics Cards */}
@@ -118,45 +116,45 @@ function Pembayaran() {
           <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md p-6 text-white">
             <div className="flex items-center justify-between mb-4">
               <div className="text-3xl">💰</div>
-              <div className="text-sm opacity-90">Total</div>
+              <div className="text-sm opacity-90">{t('payment.total')}</div>
             </div>
             <div className="text-2xl font-bold mb-1">
               {formatCurrency(stats.totalRevenue)}
             </div>
-            <div className="text-sm opacity-90">{stats.totalPayments} transaksi</div>
+            <div className="text-sm opacity-90">{stats.totalPayments} {t('payment.transactions')}</div>
           </div>
 
           <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-md p-6 text-white">
             <div className="flex items-center justify-between mb-4">
               <div className="text-3xl">📅</div>
-              <div className="text-sm opacity-90">Hari Ini</div>
+              <div className="text-sm opacity-90">{t('payment.today')}</div>
             </div>
             <div className="text-2xl font-bold mb-1">
               {formatCurrency(stats.todayRevenue)}
             </div>
-            <div className="text-sm opacity-90">Pendapatan hari ini</div>
+            <div className="text-sm opacity-90">{t('payment.todayRevenue')}</div>
           </div>
 
           <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-md p-6 text-white">
             <div className="flex items-center justify-between mb-4">
               <div className="text-3xl">📈</div>
-              <div className="text-sm opacity-90">7 Hari Terakhir</div>
+              <div className="text-sm opacity-90">{t('payment.last7Days')}</div>
             </div>
             <div className="text-2xl font-bold mb-1">
               {stats.recentPayments}
             </div>
-            <div className="text-sm opacity-90">Transaksi minggu ini</div>
+            <div className="text-sm opacity-90">{t('payment.weekTransactions')}</div>
           </div>
 
           <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-md p-6 text-white">
             <div className="flex items-center justify-between mb-4">
               <div className="text-3xl">💳</div>
-              <div className="text-sm opacity-90">Metode Pembayaran</div>
+              <div className="text-sm opacity-90">{t('payment.paymentMethod')}</div>
             </div>
             <div className="text-2xl font-bold mb-1">
               {Object.keys(stats.byPaymentMethod).length}
             </div>
-            <div className="text-sm opacity-90">Metode aktif</div>
+            <div className="text-sm opacity-90">{t('payment.activeMethods')}</div>
           </div>
         </div>
       )}
@@ -164,7 +162,7 @@ function Pembayaran() {
       {/* Payment Methods Breakdown */}
       {stats && Object.keys(stats.byPaymentMethod).length > 0 && (
         <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">Pembayaran per Metode</h2>
+          <h2 className="text-lg font-bold text-gray-800 mb-4">{t('payment.paymentPerMethod')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {Object.entries(stats.byPaymentMethod).map(([method, data]) => (
               <div key={method} className="border border-gray-200 rounded-lg p-4">
@@ -172,7 +170,7 @@ function Pembayaran() {
                 <div className="text-xl font-bold text-gray-800 mb-1">
                   {formatCurrency(data.total)}
                 </div>
-                <div className="text-xs text-gray-500">{data.count} transaksi</div>
+                <div className="text-xs text-gray-500">{data.count} {t('payment.transactions')}</div>
               </div>
             ))}
           </div>
@@ -184,7 +182,7 @@ function Pembayaran() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tanggal Mulai
+              {t('payment.startDate')}
             </label>
             <input
               type="date"
@@ -195,7 +193,7 @@ function Pembayaran() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tanggal Akhir
+              {t('payment.endDate')}
             </label>
             <input
               type="date"
@@ -206,14 +204,14 @@ function Pembayaran() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Metode Pembayaran
+              {t('payment.paymentMethod')}
             </label>
             <select
               value={filterMethod}
               onChange={(e) => setFilterMethod(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             >
-              <option value="">Semua Metode</option>
+              <option value="">{t('payment.allMethods')}</option>
               {paymentMethods.map((method) => (
                 <option key={method} value={method}>
                   {method}
@@ -226,7 +224,7 @@ function Pembayaran() {
               onClick={handleResetFilter}
               className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
             >
-              Reset Filter
+              {t('payment.resetFilter')}
             </button>
           </div>
         </div>
@@ -249,7 +247,7 @@ function Pembayaran() {
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="text-gray-600 mt-2">Memuat data...</p>
+            <p className="text-gray-600 mt-2">{t('common.loading')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -257,25 +255,25 @@ function Pembayaran() {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Kode Booking
+                    {t('payment.bookingCode')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Customer
+                    {t('booking.customer')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Rute & Jadwal
+                    {t('payment.routeSchedule')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Metode Pembayaran
+                    {t('payment.paymentMethod')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Waktu Bayar
+                    {t('payment.paymentTime')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total
+                    {t('booking.total')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    {t('common.status')}
                   </th>
                 </tr>
               </thead>
@@ -284,8 +282,8 @@ function Pembayaran() {
                   <tr>
                     <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
                       {filterStartDate || filterEndDate || filterMethod
-                        ? 'Tidak ada pembayaran yang sesuai filter'
-                        : 'Belum ada data pembayaran'}
+                        ? t('payment.noPaymentFilter')
+                        : t('common.noData')}
                     </td>
                   </tr>
                 ) : (
@@ -296,7 +294,7 @@ function Pembayaran() {
                           {payment.bookingCode}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {payment.totalSeats} kursi
+                          {payment.totalSeats} {t('schedule.seats')}
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -360,13 +358,13 @@ function Pembayaran() {
         <div className="bg-white rounded-lg shadow-md p-6 mt-6">
           <div className="flex justify-between items-center">
             <div>
-              <div className="text-sm text-gray-600">Total Pembayaran yang Ditampilkan</div>
+              <div className="text-sm text-gray-600">{t('payment.totalDisplayed')}</div>
               <div className="text-3xl font-bold text-gray-800 mt-1">
                 {formatCurrency(payments.reduce((sum, p) => sum + p.totalPrice, 0))}
               </div>
             </div>
             <div className="text-right">
-              <div className="text-sm text-gray-600">Jumlah Transaksi</div>
+              <div className="text-sm text-gray-600">{t('payment.transactionCount')}</div>
               <div className="text-3xl font-bold text-gray-800 mt-1">{payments.length}</div>
             </div>
           </div>

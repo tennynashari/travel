@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import Pagination from '../components/Pagination';
 
 function JadwalPerjalanan() {
+  const { t } = useTranslation();
   const [schedules, setSchedules] = useState([]);
   const [routes, setRoutes] = useState([]);
   const [vehicles, setVehicles] = useState([]);
@@ -36,7 +38,7 @@ function JadwalPerjalanan() {
       const response = await api.get('/schedules', { params });
       setSchedules(response.data.data);
     } catch (err) {
-      setError('Gagal mengambil data jadwal');
+      setError(t('schedule.loadError'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -122,10 +124,10 @@ function JadwalPerjalanan() {
           departureTime: currentSchedule.departureTime,
           ticketPrice: currentSchedule.ticketPrice
         });
-        setSuccess('Jadwal berhasil diupdate');
+        setSuccess(t('schedule.updateSuccess'));
       } else {
         await api.post('/schedules', currentSchedule);
-        setSuccess('Jadwal berhasil ditambahkan');
+        setSuccess(t('schedule.addSuccess'));
       }
       
       fetchSchedules();
@@ -134,19 +136,19 @@ function JadwalPerjalanan() {
         setSuccess('');
       }, 1500);
     } catch (err) {
-      setError(err.response?.data?.error || 'Gagal menyimpan data');
+      setError(err.response?.data?.error || t('schedule.saveError'));
     }
   };
 
   const handleDelete = async (id, route) => {
-    if (window.confirm(`Apakah Anda yakin ingin menghapus jadwal "${route}"?`)) {
+    if (window.confirm(t('schedule.deleteConfirm', { route }))) {
       try {
         await api.delete(`/schedules/${id}`);
-        setSuccess('Jadwal berhasil dihapus');
+        setSuccess(t('schedule.deleteSuccess'));
         fetchSchedules();
         setTimeout(() => setSuccess(''), 3000);
       } catch (err) {
-        setError(err.response?.data?.error || 'Gagal menghapus jadwal');
+        setError(err.response?.data?.error || t('schedule.saveError'));
         setTimeout(() => setError(''), 3000);
       }
     }
@@ -186,8 +188,8 @@ function JadwalPerjalanan() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Jadwal Perjalanan</h1>
-          <p className="text-gray-600 mt-1">Kelola jadwal perjalanan travel</p>
+          <h1 className="text-2xl font-bold text-gray-800">{t('schedule.title')}</h1>
+          <p className="text-gray-600 mt-1">{t('schedule.subtitle')}</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <input
@@ -203,7 +205,7 @@ function JadwalPerjalanan() {
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Tambah Jadwal
+            {t('schedule.addSchedule')}
           </button>
         </div>
       </div>
@@ -225,7 +227,7 @@ function JadwalPerjalanan() {
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="text-gray-600 mt-2">Memuat data...</p>
+            <p className="text-gray-600 mt-2">{t('common.loading')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -233,28 +235,28 @@ function JadwalPerjalanan() {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    No
+                    {t('schedule.number')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Rute
+                    {t('dashboard.route')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tanggal & Waktu
+                    {t('schedule.dateTime')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Armada
+                    {t('schedule.vehicle')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Driver
+                    {t('schedule.driver')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Harga
+                    {t('schedule.price')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Kursi Tersedia
+                    {t('schedule.availableSeats')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Aksi
+                    {t('common.actions')}
                   </th>
                 </tr>
               </thead>
@@ -262,7 +264,7 @@ function JadwalPerjalanan() {
                 {schedules.length === 0 ? (
                   <tr>
                     <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
-                      {filterDate ? 'Tidak ada jadwal pada tanggal ini' : 'Belum ada data jadwal'}
+                      {filterDate ? t('schedule.noScheduleOnDate') : t('common.noData')}
                     </td>
                   </tr>
                 ) : (
@@ -307,13 +309,13 @@ function JadwalPerjalanan() {
                             onClick={() => handleOpenModal(schedule)}
                             className="text-blue-600 hover:text-blue-800 font-medium"
                           >
-                            Edit
+                            {t('common.edit')}
                           </button>
                           <button
                             onClick={() => handleDelete(schedule.id, `${schedule.route.originCity.name} - ${schedule.route.destinationCity.name}`)}
                             className="text-red-600 hover:text-red-800 font-medium"
                           >
-                            Hapus
+                            {t('common.delete')}
                           </button>
                         </div>
                       </td>
@@ -340,7 +342,7 @@ function JadwalPerjalanan() {
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white">
               <h2 className="text-xl font-bold text-gray-800">
-                {editMode ? 'Edit Jadwal Perjalanan' : 'Tambah Jadwal Perjalanan'}
+                {editMode ? t('schedule.editSchedule') : t('schedule.addSchedule')}
               </h2>
             </div>
 
@@ -354,7 +356,7 @@ function JadwalPerjalanan() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Rute *
+                    {t('dashboard.route')} *
                   </label>
                   <select
                     value={currentSchedule.routeId}
@@ -362,7 +364,7 @@ function JadwalPerjalanan() {
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   >
-                    <option value="">Pilih Rute</option>
+                    <option value="">{t('schedule.selectRoute')}</option>
                     {routes.map((route) => (
                       <option key={route.id} value={route.id}>
                         {route.originCity.name} → {route.destinationCity.name} ({route.distance} km)
@@ -373,7 +375,7 @@ function JadwalPerjalanan() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Armada *
+                    {t('schedule.vehicle')} *
                   </label>
                   <select
                     value={currentSchedule.vehicleId}
@@ -381,10 +383,10 @@ function JadwalPerjalanan() {
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   >
-                    <option value="">Pilih Armada</option>
+                    <option value="">{t('schedule.selectVehicle')}</option>
                     {vehicles.map((vehicle) => (
                       <option key={vehicle.id} value={vehicle.id}>
-                        {vehicle.vehicleType} - {vehicle.plateNumber} ({vehicle.capacity} kursi)
+                        {vehicle.vehicleType} - {vehicle.plateNumber} ({vehicle.capacity} {t('schedule.seats')})
                       </option>
                     ))}
                   </select>
@@ -392,7 +394,7 @@ function JadwalPerjalanan() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Driver *
+                    {t('schedule.driver')} *
                   </label>
                   <select
                     value={currentSchedule.driverId}
@@ -400,7 +402,7 @@ function JadwalPerjalanan() {
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   >
-                    <option value="">Pilih Driver</option>
+                    <option value="">{t('schedule.selectDriver')}</option>
                     {drivers.map((driver) => (
                       <option key={driver.id} value={driver.id}>
                         {driver.user.name} - {driver.licenseNumber}
@@ -411,7 +413,7 @@ function JadwalPerjalanan() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Tanggal Keberangkatan *
+                    {t('schedule.departureDate')} *
                   </label>
                   <input
                     type="date"
@@ -424,7 +426,7 @@ function JadwalPerjalanan() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Waktu Keberangkatan *
+                    {t('schedule.departureTime')} *
                   </label>
                   <input
                     type="time"
@@ -437,7 +439,7 @@ function JadwalPerjalanan() {
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Harga Tiket (Rp) *
+                    {t('schedule.ticketPrice')} (Rp) *
                   </label>
                   <input
                     type="number"
@@ -457,13 +459,13 @@ function JadwalPerjalanan() {
                   onClick={handleCloseModal}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
                 >
-                  Batal
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                 >
-                  {editMode ? 'Update' : 'Simpan'}
+                  {editMode ? t('common.edit') : t('common.save')}
                 </button>
               </div>
             </form>

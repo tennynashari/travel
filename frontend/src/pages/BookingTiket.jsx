@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api, { authService } from '../services/api';
 import Pagination from '../components/Pagination';
 
 function BookingTiket() {
+  const { t } = useTranslation();
   const [bookings, setBookings] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [availableSeats, setAvailableSeats] = useState([]);
@@ -35,7 +37,7 @@ function BookingTiket() {
       const response = await api.get('/bookings', { params });
       setBookings(response.data.data);
     } catch (err) {
-      setError('Gagal mengambil data booking');
+      setError(t('booking.loadError'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -108,13 +110,13 @@ function BookingTiket() {
     setSuccess('');
 
     if (currentBooking.seatNumbers.length === 0) {
-      setError('Pilih minimal 1 kursi');
+      setError(t('booking.selectMinimum'));
       return;
     }
 
     try {
       await api.post('/bookings', currentBooking);
-      setSuccess('Booking berhasil dibuat');
+      setSuccess(t('booking.createSuccess'));
       fetchBookings();
       setTimeout(() => {
         setShowModal(false);
@@ -122,7 +124,7 @@ function BookingTiket() {
         setSuccess('');
       }, 1500);
     } catch (err) {
-      setError(err.response?.data?.error || 'Gagal membuat booking');
+      setError(err.response?.data?.error || t('booking.saveError'));
     }
   };
 
@@ -132,24 +134,24 @@ function BookingTiket() {
       if (paymentMethod) data.paymentMethod = paymentMethod;
       
       await api.put(`/bookings/${bookingId}`, data);
-      setSuccess(`Status booking berhasil diubah menjadi ${status}`);
+      setSuccess(t('booking.updateSuccess', { status }));
       fetchBookings();
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError(err.response?.data?.error || 'Gagal mengubah status');
+      setError(err.response?.data?.error || t('booking.saveError'));
       setTimeout(() => setError(''), 3000);
     }
   };
 
   const handleCancelBooking = async (bookingId, bookingCode) => {
-    if (window.confirm(`Apakah Anda yakin ingin membatalkan booking ${bookingCode}?`)) {
+    if (window.confirm(t('booking.cancelConfirm', { code: bookingCode }))) {
       try {
         await api.delete(`/bookings/${bookingId}/cancel`);
-        setSuccess('Booking berhasil dibatalkan');
+        setSuccess(t('booking.cancelSuccess'));
         fetchBookings();
         setTimeout(() => setSuccess(''), 3000);
       } catch (err) {
-        setError(err.response?.data?.error || 'Gagal membatalkan booking');
+        setError(err.response?.data?.error || t('booking.saveError'));
         setTimeout(() => setError(''), 3000);
       }
     }
@@ -166,13 +168,7 @@ function BookingTiket() {
   };
 
   const getStatusLabel = (status) => {
-    const labels = {
-      PENDING: 'Pending',
-      PAID: 'Sudah Bayar',
-      CONFIRMED: 'Terkonfirmasi',
-      CANCELLED: 'Dibatalkan'
-    };
-    return labels[status] || status;
+    return t(`booking.status.${status}`);
   };
 
   const formatDate = (dateString) => {
@@ -200,8 +196,8 @@ function BookingTiket() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Booking & Tiket</h1>
-          <p className="text-gray-600 mt-1">Kelola pemesanan tiket travel</p>
+          <h1 className="text-2xl font-bold text-gray-800">{t('booking.title')}</h1>
+          <p className="text-gray-600 mt-1">{t('booking.subtitle')}</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <select
@@ -209,11 +205,11 @@ function BookingTiket() {
             onChange={(e) => setFilterStatus(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           >
-            <option value="">Semua Status</option>
-            <option value="PENDING">Pending</option>
-            <option value="PAID">Sudah Bayar</option>
-            <option value="CONFIRMED">Terkonfirmasi</option>
-            <option value="CANCELLED">Dibatalkan</option>
+            <option value="">{t('booking.allStatus')}</option>
+            <option value="PENDING">{t('booking.status.PENDING')}</option>
+            <option value="PAID">{t('booking.status.PAID')}</option>
+            <option value="CONFIRMED">{t('booking.status.CONFIRMED')}</option>
+            <option value="CANCELLED">{t('booking.status.CANCELLED')}</option>
           </select>
           <button
             onClick={handleOpenBookingModal}
@@ -222,7 +218,7 @@ function BookingTiket() {
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Booking Baru
+            {t('booking.newBooking')}
           </button>
         </div>
       </div>
@@ -244,7 +240,7 @@ function BookingTiket() {
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="text-gray-600 mt-2">Memuat data...</p>
+            <p className="text-gray-600 mt-2">{t('common.loading')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -252,25 +248,25 @@ function BookingTiket() {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Kode Booking
+                    {t('booking.bookingCode')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {isAdmin ? 'Customer' : 'Jadwal'}
+                    {isAdmin ? t('booking.customer') : t('booking.schedule')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Rute & Tanggal
+                    {t('booking.routeDate')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Kursi
+                    {t('booking.seat')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total
+                    {t('booking.total')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    {t('common.status')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Aksi
+                    {t('common.actions')}
                   </th>
                 </tr>
               </thead>
@@ -278,7 +274,7 @@ function BookingTiket() {
                 {bookings.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
-                      Belum ada data booking
+                      {t('common.noData')}
                     </td>
                   </tr>
                 ) : (
@@ -316,7 +312,7 @@ function BookingTiket() {
                           {booking.seatNumbers.join(', ')}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {booking.totalSeats} kursi
+                          {booking.totalSeats} {t('schedule.seats')}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm font-medium text-gray-800">
@@ -335,12 +331,12 @@ function BookingTiket() {
                           {isAdmin && booking.status === 'PENDING' && (
                             <button
                               onClick={() => {
-                                const method = prompt('Metode pembayaran (Cash/Transfer/E-Wallet):');
+                                const method = prompt(t('booking.enterPaymentMethod'));
                                 if (method) handleUpdateStatus(booking.id, 'PAID', method);
                               }}
                               className="text-green-600 hover:text-green-800 font-medium text-left"
                             >
-                              Konfirmasi Bayar
+                              {t('booking.confirmPayment')}
                             </button>
                           )}
                           {isAdmin && booking.status === 'PAID' && (
@@ -348,7 +344,7 @@ function BookingTiket() {
                               onClick={() => handleUpdateStatus(booking.id, 'CONFIRMED')}
                               className="text-blue-600 hover:text-blue-800 font-medium text-left"
                             >
-                              Konfirmasi
+                              {t('booking.confirm')}
                             </button>
                           )}
                           {booking.status === 'PENDING' && (
@@ -356,7 +352,7 @@ function BookingTiket() {
                               onClick={() => handleCancelBooking(booking.id, booking.bookingCode)}
                               className="text-red-600 hover:text-red-800 font-medium text-left"
                             >
-                              Batalkan
+                              {t('booking.cancel')}
                             </button>
                           )}
                         </div>
@@ -383,7 +379,7 @@ function BookingTiket() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white">
-              <h2 className="text-xl font-bold text-gray-800">Booking Baru</h2>
+              <h2 className="text-xl font-bold text-gray-800">{t('booking.newBooking')}</h2>
             </div>
 
             <form onSubmit={handleSubmitBooking} className="p-6">
@@ -396,7 +392,7 @@ function BookingTiket() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Pilih Jadwal *
+                    {t('booking.selectSchedule')} *
                   </label>
                   <select
                     value={currentBooking.scheduleId}
@@ -404,10 +400,10 @@ function BookingTiket() {
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   >
-                    <option value="">Pilih Jadwal Tersedia</option>
+                    <option value="">{t('booking.availableSchedules')}</option>
                     {schedules.map((schedule) => (
                       <option key={schedule.id} value={schedule.id}>
-                        {schedule.route.originCity.name} → {schedule.route.destinationCity.name} | {formatDate(schedule.departureDate)} {schedule.departureTime} | {schedule.vehicle.vehicleType} | Kursi: {schedule.availableSeats}/{schedule.vehicle.capacity} | {formatCurrency(schedule.ticketPrice)}
+                        {schedule.route.originCity.name} → {schedule.route.destinationCity.name} | {formatDate(schedule.departureDate)} {schedule.departureTime} | {schedule.vehicle.vehicleType} | {t('booking.seat')}: {schedule.availableSeats}/{schedule.vehicle.capacity} | {formatCurrency(schedule.ticketPrice)}
                       </option>
                     ))}
                   </select>
@@ -415,21 +411,21 @@ function BookingTiket() {
 
                 {selectedSchedule && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <h3 className="font-semibold text-gray-800 mb-2">Detail Jadwal</h3>
+                    <h3 className="font-semibold text-gray-800 mb-2">{t('booking.schedule')}</h3>
                     <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="text-gray-600">Rute:</div>
+                      <div className="text-gray-600">{t('dashboard.route')}:</div>
                       <div className="font-medium">
                         {selectedSchedule.route.originCity.name} → {selectedSchedule.route.destinationCity.name}
                       </div>
-                      <div className="text-gray-600">Keberangkatan:</div>
+                      <div className="text-gray-600">{t('schedule.departureDate')}:</div>
                       <div className="font-medium">
                         {formatDate(selectedSchedule.departureDate)} {selectedSchedule.departureTime}
                       </div>
-                      <div className="text-gray-600">Armada:</div>
+                      <div className="text-gray-600">{t('schedule.vehicle')}:</div>
                       <div className="font-medium">
                         {selectedSchedule.vehicle.vehicleType} ({selectedSchedule.vehicle.plateNumber})
                       </div>
-                      <div className="text-gray-600">Harga/Kursi:</div>
+                      <div className="text-gray-600">{t('schedule.price')}/{t('booking.seat')}:</div>
                       <div className="font-medium">{formatCurrency(selectedSchedule.ticketPrice)}</div>
                     </div>
                   </div>
@@ -437,7 +433,7 @@ function BookingTiket() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Pilih Kursi * ({currentBooking.seatNumbers.length} dipilih)
+                    {t('booking.selectSeats')} * ({currentBooking.seatNumbers.length} {t('booking.selectedSeats')})
                   </label>
                   <button
                     type="button"
@@ -446,8 +442,8 @@ function BookingTiket() {
                     className="w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {currentBooking.seatNumbers.length > 0
-                      ? `Kursi: ${currentBooking.seatNumbers.join(', ')}`
-                      : 'Klik untuk memilih kursi'}
+                      ? `${t('booking.seat')}: ${currentBooking.seatNumbers.join(', ')}`
+                      : t('booking.selectSeats')}
                   </button>
                 </div>
 
@@ -455,7 +451,7 @@ function BookingTiket() {
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                     <div className="flex justify-between items-center">
                       <div>
-                        <div className="text-sm text-gray-600">Total Kursi: {currentBooking.seatNumbers.length}</div>
+                        <div className="text-sm text-gray-600">{t('booking.total')} {t('booking.seat')}: {currentBooking.seatNumbers.length}</div>
                         <div className="text-xl font-bold text-gray-800">
                           {formatCurrency(selectedSchedule.ticketPrice * currentBooking.seatNumbers.length)}
                         </div>
@@ -471,14 +467,14 @@ function BookingTiket() {
                   onClick={() => setShowModal(false)}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
                 >
-                  Batal
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={currentBooking.seatNumbers.length === 0}
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Konfirmasi Booking
+                  {t('booking.confirm')} {t('booking.title')}
                 </button>
               </div>
             </form>
@@ -491,9 +487,9 @@ function BookingTiket() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-gray-800">Pilih Kursi</h3>
+              <h3 className="text-lg font-bold text-gray-800">{t('booking.seatSelection')}</h3>
               <p className="text-sm text-gray-600 mt-1">
-                Tersedia: {availableSeats.availableCount} dari {availableSeats.totalSeats} kursi
+                {t('schedule.availableSeats')}: {availableSeats.availableCount} {t('common.total')} {availableSeats.totalSeats} {t('schedule.seats')}
               </p>
             </div>
 
@@ -544,14 +540,14 @@ function BookingTiket() {
 
             <div className="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
               <div className="text-sm text-gray-600">
-                {currentBooking.seatNumbers.length} kursi dipilih
+                {currentBooking.seatNumbers.length} {t('schedule.seats')} {t('booking.selectedSeats')}
               </div>
               <button
                 type="button"
                 onClick={() => setShowSeatModal(false)}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
               >
-                Selesai
+                {t('common.save')}
               </button>
             </div>
           </div>
