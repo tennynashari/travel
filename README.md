@@ -90,6 +90,10 @@ GRANT ALL PRIVILEGES ON DATABASE travel TO travel;
 
 -- Grant schema privileges (PostgreSQL 15+)
 GRANT ALL ON SCHEMA public TO travel;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO travel;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO travel;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO travel;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO travel;
 
 -- Exit
 \q
@@ -116,10 +120,13 @@ cd backend
 # Install dependencies
 npm install
 
-# File .env sudah tersedia dengan konfigurasi:
+# Buat file .env (copy dari template)
+copy .env.example .env
+
+# Isi file .env harus:
 # DATABASE_URL="postgresql://travel:travel@localhost:5432/travel?schema=public"
 # JWT_SECRET="travel-app-secret-key-2026"
-# PORT=5000
+# PORT=7000
 # NODE_ENV=development
 
 # Generate Prisma Client
@@ -135,7 +142,7 @@ npm run prisma:seed
 npm run dev
 ```
 
-Backend akan berjalan di `http://localhost:5000`
+Backend akan berjalan di `http://localhost:7000`
 
 ### 6. Setup Frontend (Terminal Baru)
 
@@ -193,7 +200,7 @@ travel/
 
 ## 🔌 API Endpoints
 
-Backend menyediakan REST API di `http://localhost:5000/api`:
+Backend menyediakan REST API di `http://localhost:7000/api`:
 
 ### Authentication (`/api/auth`)
 - `POST /register` - Register user baru
@@ -367,14 +374,14 @@ npm install
 #### Frontend Cannot Connect to Backend
 
 Pastikan:
-1. Backend running di `http://localhost:5000`
+1. Backend running di `http://localhost:7000`
 2. Check `frontend/src/services/api.js` - baseURL correct
 3. CORS enabled di backend (sudah di-handle)
 4. Firewall tidak blocking port
 
 ```bash
 # Check if port is listening
-netstat -tulpn | grep :5000
+netstat -tulpn | grep :7000
 netstat -tulpn | grep :3000
 ```
 
@@ -383,7 +390,7 @@ netstat -tulpn | grep :3000
 #### Port Already in Use
 
 ```bash
-# Check port 5000 (Backend)
+# Check port 7000 (Backend)
 netstat -ano | findstr :5000
 taskkill /PID <PID> /F
 
@@ -434,7 +441,7 @@ VITE_API_URL=https://your-domain.com/api
 
 **CATATAN PENTING:** Dengan Nginx reverse proxy:
 - ✅ Frontend bisa akses API lewat: `https://your-domain.com/api` 
-- ✅ Nginx akan forward ke backend internal: `http://localhost:5000`
+- ✅ Nginx akan forward ke backend internal: `http://localhost:7000`
 - ✅ **TIDAK PERLU** ubah code, cukup environment variable!
 
 ### 1. Install PM2 Process Manager
@@ -489,7 +496,7 @@ server {
 
     # Backend API
     location /api {
-        proxy_pass http://localhost:5000;
+        proxy_pass http://localhost:7000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -529,7 +536,7 @@ JWT_SECRET="your-super-secret-random-string-minimum-32-chars"
 
 # Application
 NODE_ENV=production
-PORT=5000
+PORT=7000
 
 # CORS - Specific domain untuk production security
 CORS_ORIGIN=https://your-domain.com

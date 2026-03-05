@@ -1,0 +1,27 @@
+[Unit]
+Description=Travel Booking Backend API
+Documentation=https://github.com/yourusername/travel
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/travel/backend
+Environment=NODE_ENV=production
+EnvironmentFile=/var/www/travel/backend/.env
+ExecStart=/usr/bin/node src/server.js
+Restart=on-failure
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=travel-backend
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Resource limits
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

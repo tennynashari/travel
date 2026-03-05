@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { authService } from '../services/api';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import MasterKota from './MasterKota';
 import MasterRute from './MasterRute';
 import MasterArmada from './MasterArmada';
@@ -13,6 +15,7 @@ import CheckIn from './CheckIn';
 import Laporan from './Laporan';
 
 function Dashboard({ user, page = 'dashboard' }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(user);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -100,25 +103,25 @@ function Dashboard({ user, page = 'dashboard' }) {
 
   const getMenuItems = () => {
     const allMenus = [
-      { id: 'dashboard', label: 'Dashboard', icon: '📊', roles: ['ADMIN', 'OPERATOR', 'DRIVER', 'CUSTOMER'] },
+      { id: 'dashboard', label: t('sidebar.dashboard'), icon: '📊', roles: ['ADMIN', 'OPERATOR', 'DRIVER', 'CUSTOMER'] },
       { 
         id: 'masterdata', 
-        label: 'Master Data', 
+        label: t('sidebar.masterData'), 
         icon: '📁', 
         roles: ['ADMIN', 'OPERATOR'],
         submenus: [
-          { id: 'kota', label: 'Master Kota', icon: '🏙️', roles: ['ADMIN', 'OPERATOR'] },
-          { id: 'rute', label: 'Master Rute', icon: '🗺️', roles: ['ADMIN', 'OPERATOR'] },
-          { id: 'driver', label: 'Driver', icon: '👨‍✈️', roles: ['ADMIN', 'OPERATOR'] },
-          { id: 'armada', label: 'Armada', icon: '🚐', roles: ['ADMIN', 'OPERATOR'] },
+          { id: 'kota', label: t('sidebar.masterCity'), icon: '🏙️', roles: ['ADMIN', 'OPERATOR'] },
+          { id: 'rute', label: t('sidebar.masterRoute'), icon: '🗺️', roles: ['ADMIN', 'OPERATOR'] },
+          { id: 'driver', label: t('sidebar.masterDriver'), icon: '👨‍✈️', roles: ['ADMIN', 'OPERATOR'] },
+          { id: 'armada', label: t('sidebar.masterVehicle'), icon: '🚐', roles: ['ADMIN', 'OPERATOR'] },
         ]
       },
-      { id: 'jadwal', label: 'Jadwal Perjalanan', icon: '📅', roles: ['ADMIN', 'OPERATOR', 'DRIVER'] },
-      { id: 'booking', label: 'Booking & Tiket', icon: '🎫', roles: ['ADMIN', 'OPERATOR', 'CUSTOMER'] },
-      { id: 'pembayaran', label: 'Pembayaran', icon: '💳', roles: ['ADMIN', 'OPERATOR'] },
-      { id: 'checkin', label: 'Check-in', icon: '✅', roles: ['ADMIN', 'OPERATOR', 'DRIVER'] },
-      { id: 'laporan', label: 'Laporan', icon: '📈', roles: ['ADMIN', 'OPERATOR'] },
-      { id: 'users', label: 'Manajemen User', icon: '👥', roles: ['ADMIN'] },
+      { id: 'jadwal', label: t('sidebar.travelSchedule'), icon: '📅', roles: ['ADMIN', 'OPERATOR', 'DRIVER'] },
+      { id: 'booking', label: t('sidebar.bookingTicket'), icon: '🎫', roles: ['ADMIN', 'OPERATOR', 'CUSTOMER'] },
+      { id: 'pembayaran', label: t('sidebar.payment'), icon: '💳', roles: ['ADMIN', 'OPERATOR'] },
+      { id: 'checkin', label: t('sidebar.checkIn'), icon: '✅', roles: ['ADMIN', 'OPERATOR', 'DRIVER'] },
+      { id: 'laporan', label: t('sidebar.reports'), icon: '📈', roles: ['ADMIN', 'OPERATOR'] },
+      { id: 'users', label: t('sidebar.userManagement'), icon: '👥', roles: ['ADMIN'] },
     ];
 
     return allMenus.filter(menu => menu.roles.includes(currentUser?.role));
@@ -251,7 +254,7 @@ function Dashboard({ user, page = 'dashboard' }) {
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
-              Logout
+              {t('common.logout')}
             </button>
           </div>
         </div>
@@ -283,6 +286,7 @@ function Dashboard({ user, page = 'dashboard' }) {
               <h1 className="text-xl font-bold text-gray-800 lg:hidden">Travel App</h1>
               
               <div className="flex items-center space-x-4">
+                <LanguageSwitcher />
                 <button className="relative text-gray-600 hover:text-gray-900">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -314,9 +318,9 @@ function Dashboard({ user, page = 'dashboard' }) {
               {/* Welcome Section */}
               <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                  Selamat Datang, {currentUser?.name}! 👋
+                  {t('common.welcome')}, {currentUser?.name}! 👋
                 </h1>
-                <p className="text-gray-600">Berikut adalah ringkasan aktivitas hari ini</p>
+                <p className="text-gray-600">{t('dashboard.subtitle')}</p>
               </div>
 
               {/* Stats Grid */}

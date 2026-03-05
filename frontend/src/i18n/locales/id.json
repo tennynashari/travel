@@ -1,0 +1,106 @@
+{
+  "common": {
+    "welcome": "Selamat Datang",
+    "logout": "Keluar",
+    "search": "Cari",
+    "add": "Tambah",
+    "edit": "Edit",
+    "delete": "Hapus",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "confirm": "Konfirmasi",
+    "loading": "Memuat...",
+    "noData": "Tidak ada data",
+    "actions": "Aksi",
+    "status": "Status",
+    "active": "Aktif",
+    "inactive": "Tidak Aktif",
+    "total": "Total",
+    "filter": "Filter",
+    "all": "Semua"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "masterData": "Master Data",
+    "masterCity": "Master Kota",
+    "masterRoute": "Master Rute",
+    "masterVehicle": "Master Armada",
+    "masterDriver": "Master Driver",
+    "travelSchedule": "Jadwal Perjalanan",
+    "bookingTicket": "Booking & Tiket",
+    "payment": "Pembayaran",
+    "checkIn": "Check-in Penumpang",
+    "userManagement": "Manajemen User",
+    "reports": "Laporan"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Ringkasan sistem manajemen travel Anda",
+    "statistics": {
+      "totalUsers": "Total Pengguna",
+      "totalBookings": "Total Booking",
+      "totalRevenue": "Total Pendapatan",
+      "activeSchedules": "Jadwal Aktif"
+    },
+    "recentActivities": "Aktivitas Terbaru",
+    "quickActions": "Aksi Cepat",
+    "addSchedule": "Tambah Jadwal",
+    "viewBookings": "Lihat Booking",
+    "manageUsers": "Kelola Pengguna"
+  },
+  "userManagement": {
+    "title": "Manajemen User",
+    "subtitle": "Kelola pengguna sistem dan hak akses",
+    "addUser": "Tambah User Baru",
+    "editUser": "Edit User",
+    "deleteUser": "Hapus User",
+    "userStatistics": "Statistik User",
+    "table": {
+      "name": "Nama",
+      "email": "Email",
+      "phone": "Telepon",
+      "role": "Role",
+      "createdAt": "Dibuat Pada",
+      "actions": "Aksi"
+    },
+    "roles": {
+      "ADMIN": "Administrator",
+      "OPERATOR": "Operator",
+      "DRIVER": "Driver",
+      "CUSTOMER": "Customer",
+      "all": "Semua Role"
+    },
+    "form": {
+      "name": "Nama Lengkap",
+      "namePlaceholder": "Masukkan nama lengkap",
+      "email": "Alamat Email",
+      "emailPlaceholder": "Masukkan alamat email",
+      "password": "Password",
+      "passwordPlaceholder": "Minimal 6 karakter",
+      "phone": "Nomor Telepon",
+      "phonePlaceholder": "Contoh: 081234567890",
+      "role": "Role User",
+      "selectRole": "Pilih role"
+    },
+    "messages": {
+      "addSuccess": "User berhasil ditambahkan",
+      "updateSuccess": "User berhasil diperbarui",
+      "deleteSuccess": "User berhasil dihapus",
+      "deleteConfirm": "Apakah Anda yakin ingin menghapus user ini?",
+      "fillRequired": "Mohon lengkapi semua field yang wajib diisi",
+      "emailInvalid": "Mohon masukkan alamat email yang valid",
+      "passwordMin": "Password minimal 6 karakter",
+      "loadError": "Gagal mengambil data user",
+      "saveError": "Gagal menyimpan user",
+      "deleteError": "Gagal menghapus user"
+    },
+    "statistics": {
+      "totalUsers": "Total User",
+      "admin": "Admin",
+      "operator": "Operator",
+      "driver": "Driver",
+      "customer": "Customer",
+      "activeUsers": "User Aktif"
+    }
+  }
+}
