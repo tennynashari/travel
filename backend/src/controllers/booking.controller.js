@@ -583,7 +583,11 @@ const getAvailableSchedules = async (req, res) => {
             destinationCity: true
           }
         },
-        vehicle: true,
+        vehicle: {
+          include: {
+            seatTemplate: true
+          }
+        },
         driver: {
           include: {
             user: {

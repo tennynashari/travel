@@ -312,10 +312,10 @@ function BookingTiket() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm font-medium text-gray-800">
-                          {booking.schedule.route.originCity.name} → {booking.schedule.route.destinationCity.name}
+                          {booking.schedule?.route?.originCity?.name || 'N/A'} → {booking.schedule?.route?.destinationCity?.name || 'N/A'}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {formatDate(booking.schedule.departureDate)} • {booking.schedule.departureTime}
+                          {formatDate(booking.schedule?.departureDate)} • {booking.schedule?.departureTime}
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -414,7 +414,7 @@ function BookingTiket() {
                     <option value="">{t('booking.availableSchedules')}</option>
                     {schedules.map((schedule) => (
                       <option key={schedule.id} value={schedule.id}>
-                        {schedule.route.originCity.name} → {schedule.route.destinationCity.name} | {formatDate(schedule.departureDate)} {schedule.departureTime} | {schedule.vehicle.vehicleType} | {t('booking.seat')}: {schedule.availableSeats}/{schedule.vehicle.capacity} | {formatCurrency(schedule.ticketPrice)}
+                        {schedule.route?.originCity?.name || 'N/A'} → {schedule.route?.destinationCity?.name || 'N/A'} | {formatDate(schedule.departureDate)} {schedule.departureTime} | {schedule.vehicle?.vehicleType || 'N/A'} | {t('booking.seat')}: {schedule.availableSeats}/{schedule.vehicle?.capacity || 0} | {formatCurrency(schedule.ticketPrice)}
                       </option>
                     ))}
                   </select>
@@ -426,7 +426,7 @@ function BookingTiket() {
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div className="text-gray-600">{t('dashboard.route')}:</div>
                       <div className="font-medium">
-                        {selectedSchedule.route.originCity.name} → {selectedSchedule.route.destinationCity.name}
+                        {selectedSchedule.route?.originCity?.name || 'N/A'} → {selectedSchedule.route?.destinationCity?.name || 'N/A'}
                       </div>
                       <div className="text-gray-600">{t('schedule.departureDate')}:</div>
                       <div className="font-medium">
