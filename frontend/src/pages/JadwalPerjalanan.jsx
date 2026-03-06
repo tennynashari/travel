@@ -60,11 +60,17 @@ function JadwalPerjalanan() {
     }
   };
 
-  const sortSchedules = (schedulesToSort) => {
-    return [...schedulesToSort].sort((a, b) => {
+  // Memoized sorted schedules
+  const sortedSchedules = useMemo(() => {
+    console.log('Sorting schedules with order:', sortOrder);
+    console.log('Number of schedules:', schedules.length);
+    
+    const sorted = [...schedules].sort((a, b) => {
       // Combine date and time for comparison
       const dateTimeA = new Date(`${a.departureDate}T${a.departureTime}`);
       const dateTimeB = new Date(`${b.departureDate}T${b.departureTime}`);
+      
+      console.log('Comparing:', dateTimeA, 'vs', dateTimeB);
       
       if (sortOrder === 'asc') {
         return dateTimeA - dateTimeB;
@@ -72,11 +78,9 @@ function JadwalPerjalanan() {
         return dateTimeB - dateTimeA;
       }
     });
-  };
-
-  // Memoized sorted schedules
-  const sortedSchedules = useMemo(() => {
-    return sortSchedules(schedules);
+    
+    console.log('Sorted result (first 3):', sorted.slice(0, 3).map(s => ({ date: s.departureDate, time: s.departureTime })));
+    return sorted;
   }, [schedules, sortOrder]);
 
   const fetchTemplates = async () => {
