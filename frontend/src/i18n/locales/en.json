@@ -17,7 +17,10 @@
     "inactive": "Inactive",
     "total": "Total",
     "filter": "Filter",
-    "all": "All"
+    "all": "All",
+    "close": "Close",
+    "or": "or",
+    "locale": "en-US"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -223,7 +226,24 @@
     "cancelConfirm": "Are you sure you want to cancel booking {{code}}?",
     "loadError": "Failed to load booking data",
     "saveError": "Failed to create booking",
-    "enterPaymentMethod": "Payment method (Cash/Transfer/E-Wallet):"
+    "enterPaymentMethod": "Payment method (Cash/Transfer/E-Wallet):",
+    "viewPaymentInfo": "View Payment Info",
+    "bookingSuccess": "Booking Successful",
+    "paymentInfo": "Payment Information",
+    "orderDetails": "Order Details",
+    "date": "Date",
+    "time": "Time",
+    "seats": "Seats",
+    "totalPayment": "Total Payment",
+    "important": "Important",
+    "paymentReminder": "Please make payment within 24 hours. Booking will be automatically cancelled if not paid.",
+    "bankTransferInfo": "Bank Transfer Information",
+    "accountNumber": "Account Number",
+    "accountName": "Account Name",
+    "qrisPayment": "QRIS Payment",
+    "qrisScan": "Scan the QR code below with your mobile banking or e-wallet app",
+    "amount": "Amount",
+    "confirmationInfo": "After making payment, confirm your payment to:"
   },
   "payment": {
     "title": "Payment",

@@ -17,7 +17,10 @@
     "inactive": "Tidak Aktif",
     "total": "Total",
     "filter": "Filter",
-    "all": "Semua"
+    "all": "Semua",
+    "close": "Tutup",
+    "or": "atau",
+    "locale": "id-ID"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -223,7 +226,24 @@
     "cancelConfirm": "Apakah Anda yakin ingin membatalkan booking {{code}}?",
     "loadError": "Gagal mengambil data booking",
     "saveError": "Gagal membuat booking",
-    "enterPaymentMethod": "Metode pembayaran (Cash/Transfer/E-Wallet):"
+    "enterPaymentMethod": "Metode pembayaran (Cash/Transfer/E-Wallet):",
+    "viewPaymentInfo": "Lihat Info Pembayaran",
+    "bookingSuccess": "Booking Berhasil",
+    "paymentInfo": "Informasi Pembayaran",
+    "orderDetails": "Detail Pemesanan",
+    "date": "Tanggal",
+    "time": "Jam",
+    "seats": "Kursi",
+    "totalPayment": "Total Pembayaran",
+    "important": "Penting",
+    "paymentReminder": "Silakan lakukan pembayaran dalam 24 jam. Booking akan otomatis dibatalkan jika belum dibayar.",
+    "bankTransferInfo": "Informasi Transfer Bank",
+    "accountNumber": "No. Rekening",
+    "accountName": "Atas Nama",
+    "qrisPayment": "Pembayaran via QRIS",
+    "qrisScan": "Scan QR code di bawah dengan aplikasi mobile banking atau e-wallet",
+    "amount": "Nominal",
+    "confirmationInfo": "Setelah melakukan pembayaran, konfirmasi pembayaran Anda ke:"
   },
   "payment": {
     "title": "Pembayaran",
