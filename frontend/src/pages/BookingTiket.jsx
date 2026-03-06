@@ -509,36 +509,42 @@ function BookingTiket() {
               <div className="space-y-3">
                 {selectedSchedule?.vehicle?.seatTemplate?.rowsConfig ? (
                   // Dynamic seat layout based on template
-                  JSON.parse(selectedSchedule.vehicle.seatTemplate.rowsConfig).map((seatsInRow, rowIndex) => {
-                    const rowSeats = getRowSeats(rowIndex, JSON.parse(selectedSchedule.vehicle.seatTemplate.rowsConfig));
+                  (() => {
+                    const rowsConfig = typeof selectedSchedule.vehicle.seatTemplate.rowsConfig === 'string' 
+                      ? JSON.parse(selectedSchedule.vehicle.seatTemplate.rowsConfig)
+                      : selectedSchedule.vehicle.seatTemplate.rowsConfig;
                     
-                    return (
-                      <div key={rowIndex} className="flex justify-center gap-3">
-                        {rowSeats.map((seatNumber) => {
-                          const isBooked = availableSeats.bookedSeats.includes(seatNumber);
-                          const isSelected = currentBooking.seatNumbers.includes(seatNumber);
+                    return rowsConfig.map((seatsInRow, rowIndex) => {
+                      const rowSeats = getRowSeats(rowIndex, rowsConfig);
+                      
+                      return (
+                        <div key={rowIndex} className="flex justify-center gap-3">
+                          {rowSeats.map((seatNumber) => {
+                            const isBooked = availableSeats.bookedSeats.includes(seatNumber);
+                            const isSelected = currentBooking.seatNumbers.includes(seatNumber);
 
-                          return (
-                            <button
-                              key={seatNumber}
-                              type="button"
-                              onClick={() => !isBooked && handleSeatToggle(seatNumber)}
-                              disabled={isBooked}
-                              className={`p-3 w-12 h-12 rounded-lg font-medium transition ${
-                                isBooked
-                                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                  : isSelected
-                                  ? 'bg-blue-600 text-white'
-                                  : 'bg-white border-2 border-gray-300 text-gray-700 hover:border-blue-500'
-                              }`}
-                            >
-                              {seatNumber}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    );
-                  })
+                            return (
+                              <button
+                                key={seatNumber}
+                                type="button"
+                                onClick={() => !isBooked && handleSeatToggle(seatNumber)}
+                                disabled={isBooked}
+                                className={`p-3 w-12 h-12 rounded-lg font-medium transition ${
+                                  isBooked
+                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    : isSelected
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-white border-2 border-gray-300 text-gray-700 hover:border-blue-500'
+                                }`}
+                              >
+                                {seatNumber}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      );
+                    });
+                  })()
                 ) : (
                   // Fallback: Simple 5-column grid if no template
                   <div className="grid grid-cols-5 gap-3">
