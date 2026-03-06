@@ -30,6 +30,7 @@ function JadwalPerjalanan() {
     templateName: ''
   });
   const [filterDate, setFilterDate] = useState('');
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' or 'desc'
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -57,6 +58,20 @@ function JadwalPerjalanan() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const sortSchedules = (schedulesToSort) => {
+    return [...schedulesToSort].sort((a, b) => {
+      // Combine date and time for comparison
+      const dateTimeA = new Date(`${a.departureDate}T${a.departureTime}`);
+      const dateTimeB = new Date(`${b.departureDate}T${b.departureTime}`);
+      
+      if (sortOrder === 'asc') {
+        return dateTimeA - dateTimeB;
+      } else {
+        return dateTimeB - dateTimeA;
+      }
+    });
   };
 
   const fetchTemplates = async () => {
@@ -335,6 +350,14 @@ function JadwalPerjalanan() {
                 onChange={(e) => setFilterDate(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white"
+              >
+                <option value="asc">Tanggal & Waktu ↑ (Lama → Baru)</option>
+                <option value="desc">Tanggal & Waktu ↓ (Baru → Lama)</option>
+              </select>
               <button
                 onClick={() => setShowSyncModal(true)}
                 className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center justify-center"
@@ -441,7 +464,7 @@ function JadwalPerjalanan() {
                       </td>
                     </tr>
                   ) : (
-                    schedules.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((schedule, index) => (
+                    sortSchedules(schedules).slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((schedule, index) => (
                       <tr key={schedule.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 text-sm text-gray-800">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                         <td className="px-6 py-4">
