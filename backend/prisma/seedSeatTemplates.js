@@ -3,7 +3,7 @@ const { PrismaClient } = require('@prisma/client');
 async function seedSeatTemplates() {
   const prisma = new PrismaClient();
   
-  console.log('🪑 Seeding seat templates...');
+  console.log('🪑 Seeding seat templates ...');
 
   try {
     // Create default seat templates
