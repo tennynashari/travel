@@ -436,10 +436,10 @@ function JadwalPerjalanan() {
               <select
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white"
               >
-                <option value="asc">Tanggal & Waktu ↑ (Lama → Baru)</option>
-                <option value="desc">Tanggal & Waktu ↓ (Baru → Lama)</option>
+                <option value="asc">↑ Terlama</option>
+                <option value="desc">↓ Terbaru</option>
               </select>
               <button
                 onClick={() => setShowSyncModal(true)}
