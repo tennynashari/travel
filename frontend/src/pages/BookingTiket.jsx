@@ -18,6 +18,8 @@ function BookingTiket() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showSeatModal, setShowSeatModal] = useState(false);
+  const [showPaymentInfo, setShowPaymentInfo] = useState(false);
+  const [createdBookingInfo, setCreatedBookingInfo] = useState(null);
   const [currentBooking, setCurrentBooking] = useState({
     scheduleId: '',
     seatNumbers: [],
@@ -126,14 +128,28 @@ function BookingTiket() {
     }
 
     try {
-      await api.post('/bookings', currentBooking);
+      const response = await api.post('/bookings', currentBooking);
+      const booking = response.data.data;
+      
+      // Save booking info and show payment modal
+      setCreatedBookingInfo({
+        bookingCode: booking.bookingCode,
+        totalAmount: booking.totalAmount,
+        seatNumbers: booking.seatNumbers,
+        schedule: selectedSchedule
+      });
+      
       setSuccess(t('booking.createSuccess'));
       fetchBookings();
+      
+      // Close booking modal and show payment info
+      setShowModal(false);
+      setShowSeatModal(false);
+      
       setTimeout(() => {
-        setShowModal(false);
-        setShowSeatModal(false);
+        setShowPaymentInfo(true);
         setSuccess('');
-      }, 1500);
+      }, 500);
     } catch (err) {
       setError(err.response?.data?.error || t('booking.saveError'));
     }
@@ -603,6 +619,168 @@ function BookingTiket() {
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
               >
                 {t('common.save')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Information Modal */}
+      {showPaymentInfo && createdBookingInfo && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-gray-200 bg-green-50">
+              <div className="flex items-center">
+                <svg className="w-8 h-8 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-800">Booking Berhasil!</h2>
+                  <p className="text-sm text-gray-600">Kode Booking: <span className="font-bold text-green-600">{createdBookingInfo.bookingCode}</span></p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6">
+              {/* Booking Summary */}
+              <div className="bg-blue-50 rounded-lg p-4 mb-6">
+                <h3 className="font-semibold text-gray-800 mb-3">Detail Pemesanan</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Rute:</span>
+                    <span className="font-medium">
+                      {createdBookingInfo.schedule?.route?.originCity?.name} → {createdBookingInfo.schedule?.route?.destinationCity?.name}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Tanggal:</span>
+                    <span className="font-medium">
+                      {new Date(createdBookingInfo.schedule?.departureDate).toLocaleDateString('id-ID', { 
+                        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Jam:</span>
+                    <span className="font-medium">{createdBookingInfo.schedule?.departureTime} WIB</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Kursi:</span>
+                    <span className="font-medium">{createdBookingInfo.seatNumbers.join(', ')}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t border-blue-200">
+                    <span className="text-gray-800 font-semibold">Total Pembayaran:</span>
+                    <span className="font-bold text-lg text-blue-600">
+                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(createdBookingInfo.totalAmount)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Instructions */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <div className="flex items-start">
+                  <svg className="w-5 h-5 text-yellow-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div>
+                    <p className="text-sm font-semibold text-yellow-800 mb-1">Penting!</p>
+                    <p className="text-sm text-yellow-700">Silakan lakukan pembayaran dalam 24 jam. Booking akan otomatis dibatalkan jika belum dibayar.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bank Transfer Info */}
+              <div className="border-2 border-gray-200 rounded-lg p-5 mb-6">
+                <h3 className="font-semibold text-gray-800 mb-4 flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                  Informasi Transfer Bank
+                </h3>
+                <div className="space-y-4">
+                  {/* BCA */}
+                  <div className="bg-blue-50 rounded-lg p-4">
+                    <div className="flex items-center mb-2">
+                      <div className="w-12 h-8 bg-blue-600 rounded flex items-center justify-center mr-3">
+                        <span className="text-white font-bold text-sm">BCA</span>
+                      </div>
+                      <span className="font-semibold text-gray-800">Bank Central Asia</span>
+                    </div>
+                    <div className="ml-15 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">No. Rekening:</span>
+                        <span className="font-mono font-bold text-gray-800">1234567890</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Atas Nama:</span>
+                        <span className="font-medium text-gray-800">PT Travel Nusantara</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Mandiri */}
+                  <div className="bg-yellow-50 rounded-lg p-4">
+                    <div className="flex items-center mb-2">
+                      <div className="w-12 h-8 bg-yellow-500 rounded flex items-center justify-center mr-3">
+                        <span className="text-white font-bold text-xs">MANDIRI</span>
+                      </div>
+                      <span className="font-semibold text-gray-800">Bank Mandiri</span>
+                    </div>
+                    <div className="ml-15 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">No. Rekening:</span>
+                        <span className="font-mono font-bold text-gray-800">9876543210</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Atas Nama:</span>
+                        <span className="font-medium text-gray-800">PT Travel Nusantara</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* QR Code Payment */}
+              <div className="border-2 border-gray-200 rounded-lg p-5">
+                <h3 className="font-semibold text-gray-800 mb-4 flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                  </svg>
+                  Pembayaran via QRIS
+                </h3>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-4">Scan QR code di bawah dengan aplikasi mobile banking atau e-wallet</p>
+                  <div className="inline-block bg-white p-4 rounded-lg border-2 border-gray-300">
+                    {/* Dummy QR Code - Using placeholder */}
+                    <div className="w-48 h-48 bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300 rounded">
+                      <div className="text-center">
+                        <svg className="w-16 h-16 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                        </svg>
+                        <p className="text-xs text-gray-500">QR Code QRIS</p>
+                        <p className="text-xs text-gray-400 mt-1">Dummy Image</p>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-3">Nominal: <span className="font-bold">
+                    {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(createdBookingInfo.totalAmount)}
+                  </span></p>
+                </div>
+              </div>
+
+              <div className="mt-6 text-center text-sm text-gray-600">
+                <p>Setelah melakukan pembayaran, konfirmasi pembayaran Anda ke:</p>
+                <p className="font-semibold text-gray-800 mt-1">WhatsApp: 0812-3456-7890 atau Email: payment@travelnusantara.com</p>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+              <button
+                onClick={() => setShowPaymentInfo(false)}
+                className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+              >
+                Tutup
               </button>
             </div>
           </div>
