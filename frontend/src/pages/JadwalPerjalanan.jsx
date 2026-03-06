@@ -80,7 +80,16 @@ function JadwalPerjalanan() {
       const response = await api.post('/schedule-templates/generate', { days });
       const result = response.data.data;
       
-      setSuccess(`Berhasil membuat ${result.created} jadwal baru. ${result.skipped} jadwal diskip (${result.skipReasons.duplicate || 0} duplikat, ${result.skipReasons.vehicleConflict || 0} konflik kendaraan, ${result.skipReasons.driverConflict || 0} konflik driver).`);
+      let message = `Berhasil membuat ${result.created} jadwal baru untuk ${result.period}.`;
+      if (result.skipped > 0) {
+        const reasons = [];
+        if (result.skipReasons?.duplicate > 0) reasons.push(`${result.skipReasons.duplicate} duplikat`);
+        if (result.skipReasons?.vehicleConflict > 0) reasons.push(`${result.skipReasons.vehicleConflict} konflik kendaraan`);
+        if (result.skipReasons?.driverConflict > 0) reasons.push(`${result.skipReasons.driverConflict} konflik driver`);
+        message += ` ${result.skipped} jadwal diskip${reasons.length > 0 ? ` (${reasons.join(', ')})` : ''}.`;
+      }
+      
+      setSuccess(message);
       setShowSyncModal(false);
       
       // Refresh schedules

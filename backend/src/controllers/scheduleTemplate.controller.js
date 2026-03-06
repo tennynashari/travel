@@ -102,6 +102,13 @@ const generateSchedules = async (req, res) => {
       });
     }
 
+    // Count skip reasons
+    const skipReasons = {
+      duplicate: skippedSchedules.filter(s => s.reason.includes('sudah ada')).length,
+      vehicleConflict: skippedSchedules.filter(s => s.reason.includes('Kendaraan')).length,
+      driverConflict: skippedSchedules.filter(s => s.reason.includes('driver')).length
+    };
+
     res.json({
       success: true,
       message: schedulesToCreate.length > 0 
@@ -110,6 +117,7 @@ const generateSchedules = async (req, res) => {
       data: {
         created: schedulesToCreate.length,
         skipped: skippedSchedules.length,
+        skipReasons,
         period: `${daysToGenerate} hari`,
         details: {
           created: schedulesToCreate.map(s => ({
