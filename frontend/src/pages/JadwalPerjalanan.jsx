@@ -97,6 +97,18 @@ function JadwalPerjalanan() {
     return sorted;
   }, [schedules, sortOrder]);
 
+  // Count past schedules
+  const pastSchedulesCount = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return schedules.filter(s => {
+      const scheduleDate = new Date(s.departureDate);
+      scheduleDate.setHours(0, 0, 0, 0);
+      return scheduleDate < today;
+    }).length;
+  }, [schedules]);
+
   const fetchTemplates = async () => {
     try {
       setLoading(true);
@@ -140,6 +152,54 @@ function JadwalPerjalanan() {
       setError(err.response?.data?.error || 'Gagal melakukan sinkronisasi');
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const handleDeletePastSchedules = async () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Count past schedules
+    const pastSchedules = schedules.filter(s => {
+      const scheduleDate = new Date(s.departureDate);
+      scheduleDate.setHours(0, 0, 0, 0);
+      return scheduleDate < today;
+    });
+    
+    if (pastSchedules.length === 0) {
+      setError('Tidak ada jadwal yang sudah lewat');
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
+    
+    const confirmMessage = `Hapus ${pastSchedules.length} jadwal yang sudah lewat (hari kemarin dan sebelumnya)?`;
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Delete each past schedule
+      let deletedCount = 0;
+      for (const schedule of pastSchedules) {
+        try {
+          await api.delete(`/schedules/${schedule.id}`);
+          deletedCount++;
+        } catch (err) {
+          console.error('Failed to delete schedule:', schedule.id, err);
+        }
+      }
+      
+      setSuccess(`${deletedCount} jadwal yang sudah lewat berhasil dihapus`);
+      fetchSchedules();
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Gagal menghapus jadwal');
+      setTimeout(() => setError(''), 3000);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -383,12 +443,27 @@ function JadwalPerjalanan() {
               </select>
               <button
                 onClick={() => setShowSyncModal(true)}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center justify-center"
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                Sinkronisasi Jadwal
+                Sinkronisasi
+              </button>
+              <button
+                onClick={handleDeletePastSchedules}
+                disabled={pastSchedulesCount === 0}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center justify-center whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed relative"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Hapus Jadwal Lewat
+                {pastSchedulesCount > 0 && (
+                  <span className="ml-2 bg-white text-red-600 px-2 py-0.5 rounded-full text-xs font-bold">
+                    {pastSchedulesCount}
+                  </span>
+                )}
               </button>
             </>
           )}
