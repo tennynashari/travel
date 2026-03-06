@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import Pagination from '../components/Pagination';
@@ -73,6 +73,11 @@ function JadwalPerjalanan() {
       }
     });
   };
+
+  // Memoized sorted schedules
+  const sortedSchedules = useMemo(() => {
+    return sortSchedules(schedules);
+  }, [schedules, sortOrder]);
 
   const fetchTemplates = async () => {
     try {
@@ -457,14 +462,14 @@ function JadwalPerjalanan() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {schedules.length === 0 ? (
+                  {sortedSchedules.length === 0 ? (
                     <tr>
                       <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
                         {filterDate ? t('schedule.noScheduleOnDate') : t('common.noData')}
                       </td>
                     </tr>
                   ) : (
-                    sortSchedules(schedules).slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((schedule, index) => (
+                    sortedSchedules.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((schedule, index) => (
                       <tr key={schedule.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 text-sm text-gray-800">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                         <td className="px-6 py-4">
@@ -522,10 +527,10 @@ function JadwalPerjalanan() {
               </table>
             </div>
           )}
-          {!loading && schedules.length > 0 && (
+          {!loading && sortedSchedules.length > 0 && (
             <Pagination
               currentPage={currentPage}
-              totalItems={schedules.length}
+              totalItems={sortedSchedules.length}
               itemsPerPage={itemsPerPage}
               onPageChange={setCurrentPage}
             />
