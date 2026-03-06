@@ -5,12 +5,16 @@ import Pagination from '../components/Pagination';
 
 function JadwalPerjalanan() {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState('schedules'); // 'schedules' or 'templates'
   const [schedules, setSchedules] = useState([]);
+  const [templates, setTemplates] = useState([]);
   const [routes, setRoutes] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showSyncModal, setShowSyncModal] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [currentSchedule, setCurrentSchedule] = useState({
     id: '',
@@ -19,7 +23,11 @@ function JadwalPerjalanan() {
     driverId: '',
     departureDate: '',
     departureTime: '',
-    ticketPrice: ''
+    ticketPrice: '',
+    isTemplate: false,
+    recurringType: 'NONE',
+    recurringDays: [],
+    templateName: ''
   });
   const [filterDate, setFilterDate] = useState('');
   const [error, setError] = useState('');
@@ -28,20 +36,63 @@ function JadwalPerjalanan() {
   const [itemsPerPage] = useState(10);
 
   useEffect(() => {
-    fetchSchedules();
-  }, [filterDate]);
+    if (activeTab === 'schedules') {
+      fetchSchedules();
+    } else {
+      fetchTemplates();
+    }
+  }, [filterDate, activeTab]);
 
   const fetchSchedules = async () => {
     try {
       setLoading(true);
       const params = filterDate ? { date: filterDate } : {};
       const response = await api.get('/schedules', { params });
-      setSchedules(response.data.data);
+      // Filter only real schedules (not templates)
+      const realSchedules = response.data.data.filter(s => !s.isTemplate);
+      setSchedules(realSchedules);
     } catch (err) {
       setError(t('schedule.loadError'));
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTemplates = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/schedule-templates');
+      setTemplates(response.data.data);
+    } catch (err) {
+      setError('Gagal memuat template jadwal');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSyncSchedules = async (days) => {
+    try {
+      setSyncing(true);
+      setError('');
+      setSuccess('');
+      const response = await api.post('/schedule-templates/generate', { days });
+      const result = response.data.data;
+      
+      setSuccess(`Berhasil membuat ${result.created} jadwal baru. ${result.skipped} jadwal diskip (${result.skipReasons.duplicate || 0} duplikat, ${result.skipReasons.vehicleConflict || 0} konflik kendaraan, ${result.skipReasons.driverConflict || 0} konflik driver).`);
+      setShowSyncModal(false);
+      
+      // Refresh schedules
+      if (activeTab === 'schedules') {
+        fetchSchedules();
+      }
+      
+      setTimeout(() => setSuccess(''), 5000);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Gagal melakukan sinkronisasi');
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -61,22 +112,25 @@ function JadwalPerjalanan() {
     }
   };
 
-  const handleOpenModal = async (schedule = null) => {
+  const handleOpenModal = async (schedule = null, isTemplate = false) => {
     await fetchDropdownData();
     
     if (schedule) {
       setEditMode(true);
-      const departureDate = new Date(schedule.departureDate);
-      const formattedDate = departureDate.toISOString().split('T')[0];
+      const departureDate = schedule.departureDate ? new Date(schedule.departureDate).toISOString().split('T')[0] : '';
       
       setCurrentSchedule({
         id: schedule.id,
         routeId: schedule.routeId,
         vehicleId: schedule.vehicleId,
         driverId: schedule.driverId,
-        departureDate: formattedDate,
+        departureDate: departureDate,
         departureTime: schedule.departureTime,
-        ticketPrice: schedule.ticketPrice
+        ticketPrice: schedule.ticketPrice,
+        isTemplate: schedule.isTemplate || false,
+        recurringType: schedule.recurringType || 'NONE',
+        recurringDays: schedule.recurringDays || [],
+        templateName: schedule.templateName || ''
       });
     } else {
       setEditMode(false);
@@ -87,7 +141,11 @@ function JadwalPerjalanan() {
         driverId: '',
         departureDate: '',
         departureTime: '',
-        ticketPrice: ''
+        ticketPrice: '',
+        isTemplate: isTemplate,
+        recurringType: 'NONE',
+        recurringDays: [],
+        templateName: ''
       });
     }
     setShowModal(true);
@@ -104,7 +162,11 @@ function JadwalPerjalanan() {
       driverId: '',
       departureDate: '',
       departureTime: '',
-      ticketPrice: ''
+      ticketPrice: '',
+      isTemplate: false,
+      recurringType: 'NONE',
+      recurringDays: [],
+      templateName: ''
     });
     setError('');
   };
@@ -115,22 +177,46 @@ function JadwalPerjalanan() {
     setSuccess('');
 
     try {
-      if (editMode) {
-        await api.put(`/schedules/${currentSchedule.id}`, {
-          routeId: currentSchedule.routeId,
-          vehicleId: currentSchedule.vehicleId,
-          driverId: currentSchedule.driverId,
-          departureDate: currentSchedule.departureDate,
-          departureTime: currentSchedule.departureTime,
-          ticketPrice: currentSchedule.ticketPrice
-        });
-        setSuccess(t('schedule.updateSuccess'));
+      const payload = {
+        routeId: currentSchedule.routeId,
+        vehicleId: currentSchedule.vehicleId,
+        driverId: currentSchedule.driverId,
+        departureTime: currentSchedule.departureTime,
+        ticketPrice: currentSchedule.ticketPrice
+      };
+
+      if (currentSchedule.isTemplate) {
+        // Template: tidak perlu departureDate
+        payload.isTemplate = true;
+        payload.recurringType = currentSchedule.recurringType;
+        payload.templateName = currentSchedule.templateName;
+        
+        if (currentSchedule.recurringType === 'WEEKLY') {
+          payload.recurringDays = currentSchedule.recurringDays;
+        }
+
+        if (editMode) {
+          await api.put(`/schedule-templates/${currentSchedule.id}`, payload);
+          setSuccess('Template berhasil diperbarui');
+        } else {
+          await api.post('/schedule-templates', payload);
+          setSuccess('Template berhasil ditambahkan');
+        }
+        fetchTemplates();
       } else {
-        await api.post('/schedules', currentSchedule);
-        setSuccess(t('schedule.addSuccess'));
+        // Real schedule: perlu departureDate
+        payload.departureDate = currentSchedule.departureDate;
+        
+        if (editMode) {
+          await api.put(`/schedules/${currentSchedule.id}`, payload);
+          setSuccess(t('schedule.updateSuccess'));
+        } else {
+          await api.post('/schedules', payload);
+          setSuccess(t('schedule.addSuccess'));
+        }
+        fetchSchedules();
       }
       
-      fetchSchedules();
       setTimeout(() => {
         handleCloseModal();
         setSuccess('');
@@ -152,6 +238,46 @@ function JadwalPerjalanan() {
         setTimeout(() => setError(''), 3000);
       }
     }
+  };
+
+  const handleDeleteTemplate = async (id, name) => {
+    if (window.confirm(`Hapus template "${name}"?`)) {
+      try {
+        await api.delete(`/schedule-templates/${id}`);
+        setSuccess('Template berhasil dihapus');
+        fetchTemplates();
+        setTimeout(() => setSuccess(''), 3000);
+      } catch (err) {
+        setError(err.response?.data?.error || 'Gagal menghapus template');
+        setTimeout(() => setError(''), 3000);
+      }
+    }
+  };
+
+  const toggleRecurringDay = (day) => {
+    const days = [...currentSchedule.recurringDays];
+    const index = days.indexOf(day);
+    if (index > -1) {
+      days.splice(index, 1);
+    } else {
+      days.push(day);
+    }
+    setCurrentSchedule({ ...currentSchedule, recurringDays: days.sort() });
+  };
+
+  const getDayName = (day) => {
+    const names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    return names[day];
+  };
+
+  const getRecurringTypeLabel = (type) => {
+    const labels = {
+      'NONE': 'Sekali Jalan',
+      'DAILY': 'Setiap Hari',
+      'WEEKLY': 'Mingguan',
+      'MONTHLY': 'Bulanan'
+    };
+    return labels[type] || type;
   };
 
   const formatDate = (dateString) => {
@@ -192,22 +318,59 @@ function JadwalPerjalanan() {
           <p className="text-gray-600 mt-1">{t('schedule.subtitle')}</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <input
-            type="date"
-            value={filterDate}
-            onChange={(e) => setFilterDate(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-          />
+          {activeTab === 'schedules' && (
+            <>
+              <input
+                type="date"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              />
+              <button
+                onClick={() => setShowSyncModal(true)}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center justify-center"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Sinkronisasi Jadwal
+              </button>
+            </>
+          )}
           <button
-            onClick={() => handleOpenModal()}
+            onClick={() => handleOpenModal(null, activeTab === 'templates')}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            {t('schedule.addSchedule')}
+            {activeTab === 'schedules' ? t('schedule.addSchedule') : 'Tambah Template'}
           </button>
         </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-gray-200 mb-6">
+        <button
+          onClick={() => setActiveTab('schedules')}
+          className={`px-6 py-3 font-medium transition ${
+            activeTab === 'schedules'
+              ? 'border-b-2 border-blue-600 text-blue-600'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          Jadwal Aktif
+        </button>
+        <button
+          onClick={() => setActiveTab('templates')}
+          className={`px-6 py-3 font-medium transition ${
+            activeTab === 'templates'
+              ? 'border-b-2 border-blue-600 text-blue-600'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          Template Jadwal
+        </button>
       </div>
 
       {/* Alert Messages */}
@@ -222,119 +385,314 @@ function JadwalPerjalanan() {
         </div>
       )}
 
-      {/* Table */}
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="text-gray-600 mt-2">{t('common.loading')}</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('schedule.number')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('dashboard.route')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('schedule.dateTime')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('schedule.vehicle')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('schedule.driver')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('schedule.price')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('schedule.availableSeats')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('common.actions')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {schedules.length === 0 ? (
+      {/* Schedules Table */}
+      {activeTab === 'schedules' && (
+        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="text-gray-600 mt-2">{t('common.loading')}</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
-                      {filterDate ? t('schedule.noScheduleOnDate') : t('common.noData')}
-                    </td>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('schedule.number')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('dashboard.route')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('schedule.dateTime')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('schedule.vehicle')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('schedule.driver')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('schedule.price')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('schedule.availableSeats')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('common.actions')}
+                    </th>
                   </tr>
-                ) : (
-                  schedules.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((schedule, index) => (
-                    <tr key={schedule.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm text-gray-800">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-800">
-                          {schedule.route.originCity.name} → {schedule.route.destinationCity.name}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {schedule.route.originCity.province} - {schedule.route.destinationCity.province}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-800">
-                          {formatDate(schedule.departureDate)}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {formatTime(schedule.departureTime)} WIB
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-800">{schedule.vehicle.vehicleType}</div>
-                        <div className="text-xs text-gray-500">{schedule.vehicle.plateNumber}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-800">{schedule.driver.user.name}</div>
-                        <div className="text-xs text-gray-500">{schedule.driver.licenseNumber}</div>
-                      </td>
-                      <td className="px-6 py-4 text-sm font-medium text-gray-800">
-                        {formatCurrency(schedule.ticketPrice)}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${getSeatsStatus(schedule.availableSeats, schedule.vehicle.capacity)}`}>
-                          {schedule.availableSeats} / {schedule.vehicle.capacity}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => handleOpenModal(schedule)}
-                            className="text-blue-600 hover:text-blue-800 font-medium"
-                          >
-                            {t('common.edit')}
-                          </button>
-                          <button
-                            onClick={() => handleDelete(schedule.id, `${schedule.route.originCity.name} - ${schedule.route.destinationCity.name}`)}
-                            className="text-red-600 hover:text-red-800 font-medium"
-                          >
-                            {t('common.delete')}
-                          </button>
-                        </div>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {schedules.length === 0 ? (
+                    <tr>
+                      <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
+                        {filterDate ? t('schedule.noScheduleOnDate') : t('common.noData')}
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    schedules.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((schedule, index) => (
+                      <tr key={schedule.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 text-sm text-gray-800">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-medium text-gray-800">
+                            {schedule.route.originCity.name} → {schedule.route.destinationCity.name}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {schedule.route.originCity.province} - {schedule.route.destinationCity.province}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-medium text-gray-800">
+                            {formatDate(schedule.departureDate)}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {formatTime(schedule.departureTime)} WIB
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-800">{schedule.vehicle.vehicleType}</div>
+                          <div className="text-xs text-gray-500">{schedule.vehicle.plateNumber}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-800">{schedule.driver.user.name}</div>
+                          <div className="text-xs text-gray-500">{schedule.driver.licenseNumber}</div>
+                        </td>
+                        <td className="px-6 py-4 text-sm font-medium text-gray-800">
+                          {formatCurrency(schedule.ticketPrice)}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${getSeatsStatus(schedule.availableSeats, schedule.vehicle.capacity)}`}>
+                            {schedule.availableSeats} / {schedule.vehicle.capacity}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => handleOpenModal(schedule)}
+                              className="text-blue-600 hover:text-blue-800 font-medium"
+                            >
+                              {t('common.edit')}
+                            </button>
+                            <button
+                              onClick={() => handleDelete(schedule.id, `${schedule.route.originCity.name} - ${schedule.route.destinationCity.name}`)}
+                              className="text-red-600 hover:text-red-800 font-medium"
+                            >
+                              {t('common.delete')}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {!loading && schedules.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalItems={schedules.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Templates Table */}
+      {activeTab === 'templates' && (
+        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="text-gray-600 mt-2">{t('common.loading')}</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      No
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Nama Template
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('dashboard.route')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Pola Berulang
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Jam Berangkat
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('schedule.vehicle')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('common.actions')}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {templates.length === 0 ? (
+                    <tr>
+                      <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
+                        Belum ada template jadwal
+                      </td>
+                    </tr>
+                  ) : (
+                    templates.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((template, index) => (
+                      <tr key={template.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 text-sm text-gray-800">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-medium text-gray-800">{template.templateName || '-'}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-medium text-gray-800">
+                            {template.route.originCity.name} → {template.route.destinationCity.name}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {template.route.originCity.province} - {template.route.destinationCity.province}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-800">{getRecurringTypeLabel(template.recurringType)}</div>
+                          {template.recurringType === 'WEEKLY' && template.recurringDays && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              {template.recurringDays.map(day => getDayName(day)).join(', ')}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-800">
+                          {formatTime(template.departureTime)} WIB
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-800">{template.vehicle.vehicleType}</div>
+                          <div className="text-xs text-gray-500">{template.vehicle.plateNumber}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${
+                            template.isActive ? 'text-green-600 bg-green-50' : 'text-gray-600 bg-gray-50'
+                          }`}>
+                            {template.isActive ? 'Aktif' : 'Nonaktif'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => handleOpenModal(template, true)}
+                              className="text-blue-600 hover:text-blue-800 font-medium"
+                            >
+                              {t('common.edit')}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTemplate(template.id, template.templateName)}
+                              className="text-red-600 hover:text-red-800 font-medium"
+                            >
+                              {t('common.delete')}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {!loading && templates.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalItems={templates.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Sync Modal */}
+      {showSyncModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-800">Sinkronisasi Jadwal</h2>
+            </div>
+
+            <div className="p-6">
+              <p className="text-gray-600 mb-6">
+                Sistem akan membuat jadwal otomatis dari template yang aktif. Pilih periode waktu:
+              </p>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                  {error}
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <button
+                  onClick={() => handleSyncSchedules(7)}
+                  disabled={syncing}
+                  className="w-full px-6 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  {syncing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      Memproses...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      7 Hari Ke Depan
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => handleSyncSchedules(30)}
+                  disabled={syncing}
+                  className="w-full px-6 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  {syncing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      Memproses...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      30 Hari Ke Depan
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowSyncModal(false);
+                    setError('');
+                  }}
+                  disabled={syncing}
+                  className="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Batal
+                </button>
+              </div>
+            </div>
           </div>
-        )}
-        {!loading && schedules.length > 0 && (
-          <Pagination
-            currentPage={currentPage}
-            totalItems={schedules.length}
-            itemsPerPage={itemsPerPage}
-            onPageChange={setCurrentPage}
-          />
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Modal */}
       {showModal && (
@@ -342,7 +700,10 @@ function JadwalPerjalanan() {
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white">
               <h2 className="text-xl font-bold text-gray-800">
-                {editMode ? t('schedule.editSchedule') : t('schedule.addSchedule')}
+                {editMode 
+                  ? (currentSchedule.isTemplate ? 'Edit Template' : t('schedule.editSchedule'))
+                  : (currentSchedule.isTemplate ? 'Tambah Template' : t('schedule.addSchedule'))
+                }
               </h2>
             </div>
 
@@ -354,6 +715,23 @@ function JadwalPerjalanan() {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Template Name (only for templates) */}
+                {currentSchedule.isTemplate && (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nama Template *
+                    </label>
+                    <input
+                      type="text"
+                      value={currentSchedule.templateName}
+                      onChange={(e) => setCurrentSchedule({ ...currentSchedule, templateName: e.target.value })}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                      placeholder="Contoh: Jadwal Harian Jakarta-Bandung"
+                    />
+                  </div>
+                )}
+
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     {t('dashboard.route')} *
@@ -411,18 +789,68 @@ function JadwalPerjalanan() {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('schedule.departureDate')} *
-                  </label>
-                  <input
-                    type="date"
-                    value={currentSchedule.departureDate}
-                    onChange={(e) => setCurrentSchedule({ ...currentSchedule, departureDate: e.target.value })}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                  />
-                </div>
+                {/* Recurring Type (only for templates) */}
+                {currentSchedule.isTemplate && (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Pola Berulang *
+                    </label>
+                    <select
+                      value={currentSchedule.recurringType}
+                      onChange={(e) => setCurrentSchedule({ ...currentSchedule, recurringType: e.target.value, recurringDays: e.target.value === 'WEEKLY' ? currentSchedule.recurringDays : [] })}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                    >
+                      <option value="DAILY">Setiap Hari</option>
+                      <option value="WEEKLY">Mingguan (Pilih Hari)</option>
+                      <option value="MONTHLY">Bulanan</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* Recurring Days (only for WEEKLY templates) */}
+                {currentSchedule.isTemplate && currentSchedule.recurringType === 'WEEKLY' && (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Pilih Hari Operasional *
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {[0, 1, 2, 3, 4, 5, 6].map((day) => (
+                        <button
+                          key={day}
+                          type="button"
+                          onClick={() => toggleRecurringDay(day)}
+                          className={`px-4 py-2 rounded-lg border transition ${
+                            currentSchedule.recurringDays.includes(day)
+                              ? 'bg-blue-600 text-white border-blue-600'
+                              : 'bg-white text-gray-700 border-gray-300 hover:border-blue-600'
+                          }`}
+                        >
+                          {getDayName(day)}
+                        </button>
+                      ))}
+                    </div>
+                    {currentSchedule.recurringDays.length === 0 && (
+                      <p className="text-sm text-red-600 mt-1">Pilih minimal 1 hari</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Departure Date (only for real schedules) */}
+                {!currentSchedule.isTemplate && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('schedule.departureDate')} *
+                    </label>
+                    <input
+                      type="date"
+                      value={currentSchedule.departureDate}
+                      onChange={(e) => setCurrentSchedule({ ...currentSchedule, departureDate: e.target.value })}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                    />
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -437,7 +865,7 @@ function JadwalPerjalanan() {
                   />
                 </div>
 
-                <div className="md:col-span-2">
+                <div className={currentSchedule.isTemplate ? 'md:col-span-2' : 'md:col-span-2'}>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     {t('schedule.ticketPrice')} (Rp) *
                   </label>
@@ -463,7 +891,8 @@ function JadwalPerjalanan() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                  disabled={currentSchedule.isTemplate && currentSchedule.recurringType === 'WEEKLY' && currentSchedule.recurringDays.length === 0}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {editMode ? t('common.edit') : t('common.save')}
                 </button>
