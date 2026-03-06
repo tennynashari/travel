@@ -117,7 +117,7 @@ function Dashboard({ user, page = 'dashboard' }) {
           { id: 'kota', label: t('sidebar.masterCity'), icon: '🏙️', roles: ['ADMIN', 'OPERATOR'] },
           { id: 'rute', label: t('sidebar.masterRoute'), icon: '🗺️', roles: ['ADMIN', 'OPERATOR'] },
           { id: 'driver', label: t('sidebar.masterDriver'), icon: '👨‍✈️', roles: ['ADMIN', 'OPERATOR'] },
-          { id: 'template-kursi', label: 'Master Template Kursi', icon: '🪑', roles: ['ADMIN', 'OPERATOR'] },
+          { id: 'template-kursi', label: t('sidebar.masterSeatTemplate'), icon: '🪑', roles: ['ADMIN', 'OPERATOR'] },
           { id: 'armada', label: t('sidebar.masterVehicle'), icon: '🚐', roles: ['ADMIN', 'OPERATOR'] },
         ]
       },

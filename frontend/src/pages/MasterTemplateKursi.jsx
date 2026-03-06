@@ -33,7 +33,7 @@ function MasterTemplateKursi() {
       const response = await api.get('/seat-templates');
       setTemplates(response.data.data);
     } catch (err) {
-      setError('Gagal mengambil data template kursi');
+      setError(t('masterSeatTemplate.loadError'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -83,10 +83,10 @@ function MasterTemplateKursi() {
 
       if (editMode) {
         await api.put(`/seat-templates/${formData.id}`, data);
-        setSuccess('Template berhasil diupdate');
+        setSuccess(t('masterSeatTemplate.updateSuccess'));
       } else {
         await api.post('/seat-templates', data);
-        setSuccess('Template berhasil dibuat');
+        setSuccess(t('masterSeatTemplate.addSuccess'));
       }
 
       fetchTemplates();
@@ -95,19 +95,19 @@ function MasterTemplateKursi() {
         setSuccess('');
       }, 1500);
     } catch (err) {
-      setError(err.response?.data?.error || 'Gagal menyimpan template');
+      setError(err.response?.data?.error || t('masterSeatTemplate.saveError'));
     }
   };
 
   const handleDelete = async (id, name) => {
-    if (window.confirm(`Apakah Anda yakin ingin menghapus template "${name}"?`)) {
+    if (window.confirm(t('masterSeatTemplate.deleteConfirm', { name }))) {
       try {
         await api.delete(`/seat-templates/${id}`);
-        setSuccess('Template berhasil dihapus');
+        setSuccess(t('masterSeatTemplate.deleteSuccess'));
         fetchTemplates();
         setTimeout(() => setSuccess(''), 3000);
       } catch (err) {
-        setError(err.response?.data?.error || 'Gagal menghapus template');
+        setError(err.response?.data?.error || t('masterSeatTemplate.deleteError'));
         setTimeout(() => setError(''), 3000);
       }
     }
@@ -155,7 +155,7 @@ function MasterTemplateKursi() {
           const seatNumbers = getSeatNumbers(rowIndex, rowsConfig);
           return (
             <div key={rowIndex} className="flex items-center justify-center gap-2">
-              <span className="text-xs text-gray-500 w-12 text-right">Row {rowIndex + 1}:</span>
+              <span className="text-xs text-gray-500 w-12 text-right">{t('masterSeatTemplate.rowLabel', { number: rowIndex + 1 })}:</span>
               <div className="flex gap-2">
                 {seatNumbers.map((seatNum) => (
                   <div
@@ -178,8 +178,8 @@ function MasterTemplateKursi() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Master Template Kursi</h1>
-          <p className="text-gray-600 mt-1">Kelola template layout kursi untuk kendaraan</p>
+          <h1 className="text-2xl font-bold text-gray-800">{t('masterSeatTemplate.title')}</h1>
+          <p className="text-gray-600 mt-1">{t('masterSeatTemplate.subtitle')}</p>
         </div>
         <button
           onClick={() => handleOpenModal()}
@@ -188,7 +188,7 @@ function MasterTemplateKursi() {
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          Tambah Template
+          {t('masterSeatTemplate.addTemplate')}
         </button>
       </div>
 
@@ -225,7 +225,7 @@ function MasterTemplateKursi() {
                       {template.name}
                       {template.isDefault && (
                         <span className="ml-2 inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                          ⭐ Default
+                          ⭐ {t('masterSeatTemplate.default')}
                         </span>
                       )}
                     </h3>
@@ -236,17 +236,17 @@ function MasterTemplateKursi() {
                 </div>
 
                 <div className="mb-4">
-                  <div className="text-sm text-gray-600 mb-2">Total: {template.totalSeats} kursi</div>
+                  <div className="text-sm text-gray-600 mb-2">{t('common.total')}: {template.totalSeats} {t('schedule.seats')}</div>
                   <div className="bg-gray-50 rounded-lg p-3">
                     {getPreviewGrid(template.rowsConfig)}
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-                  <span>{template.rowsConfig.length} rows</span>
-                  <span>{template._count?.vehicles || 0} kendaraan</span>
+                  <span>{template.rowsConfig.length} {t('masterSeatTemplate.rows')}</span>
+                  <span>{template._count?.vehicles || 0} {t('masterSeatTemplate.vehicles')}</span>
                   <span className={`px-2 py-1 rounded ${template.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                    {template.isActive ? 'Aktif' : 'Tidak Aktif'}
+                    {template.isActive ? t('common.active') : t('common.inactive')}
                   </span>
                 </div>
 
@@ -287,7 +287,7 @@ function MasterTemplateKursi() {
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white">
               <h2 className="text-xl font-bold text-gray-800">
-                {editMode ? 'Edit Template Kursi' : '✨ Tambah Template Kursi'}
+                {editMode ? t('masterSeatTemplate.editTemplate') : '✨ ' + t('masterSeatTemplate.addTemplate')}
               </h2>
             </div>
 
@@ -301,7 +301,7 @@ function MasterTemplateKursi() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nama Template *
+                    {t('masterSeatTemplate.templateName')} *
                   </label>
                   <input
                     type="text"
@@ -309,26 +309,26 @@ function MasterTemplateKursi() {
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    placeholder="Contoh: Minibus VIP"
+                    placeholder={t('masterSeatTemplate.enterName')}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Deskripsi (opsional)
+                    {t('masterSeatTemplate.description')}
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows="2"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    placeholder="Jelaskan layout kursi ini..."
+                    placeholder={t('masterSeatTemplate.enterDescription')}
                   />
                 </div>
 
                 <div className="border-t border-gray-200 pt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    🪑 Konfigurasi Baris Kursi
+                    🪑 {t('masterSeatTemplate.rowConfiguration')}
                   </label>
 
                   <div className="space-y-2 mb-3">
@@ -343,14 +343,14 @@ function MasterTemplateKursi() {
                           onChange={(e) => updateRow(index, e.target.value)}
                           className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                         />
-                        <span className="text-sm text-gray-600">kursi per baris</span>
+                        <span className="text-sm text-gray-600">{t('masterSeatTemplate.seatsPerRow')}</span>
                         <button
                           type="button"
                           onClick={() => removeRow(index)}
                           disabled={formData.rowsConfig.length === 1}
                           className="ml-auto px-3 py-1 text-sm bg-red-50 text-red-700 rounded hover:bg-red-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          Hapus
+                          {t('masterSeatTemplate.removeRow')}
                         </button>
                       </div>
                     ))}
@@ -361,20 +361,20 @@ function MasterTemplateKursi() {
                     onClick={addRow}
                     className="w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-sm text-gray-600 hover:text-blue-700"
                   >
-                    + Tambah Baris
+                    + {t('masterSeatTemplate.addRow')}
                   </button>
                 </div>
 
                 <div className="border-t border-gray-200 pt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    👁️ Preview Layout:
+                    👁️ {t('masterSeatTemplate.preview')}:
                   </label>
                   <div className="bg-gray-50 rounded-lg p-4">
                     {getPreviewGrid(formData.rowsConfig)}
                   </div>
                   <div className="mt-2 text-center">
                     <span className="inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">
-                      ✅ Total: {getTotalSeats(formData.rowsConfig)} kursi
+                      ✅ {t('common.total')}: {getTotalSeats(formData.rowsConfig)} {t('schedule.seats')}
                     </span>
                   </div>
                 </div>
@@ -387,7 +387,7 @@ function MasterTemplateKursi() {
                       onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
                       className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Set sebagai template default</span>
+                    <span className="ml-2 text-sm text-gray-700">{t('masterSeatTemplate.setAsDefault')}</span>
                   </label>
 
                   <label className="flex items-center cursor-pointer">
@@ -397,7 +397,7 @@ function MasterTemplateKursi() {
                       onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                       className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Aktif</span>
+                    <span className="ml-2 text-sm text-gray-700">{t('masterSeatTemplate.active')}</span>
                   </label>
                 </div>
               </div>
@@ -414,7 +414,7 @@ function MasterTemplateKursi() {
                   type="submit"
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                 >
-                  {editMode ? t('common.save') : 'Buat Template'}
+                  {editMode ? t('common.save') : t('masterSeatTemplate.addTemplate')}
                 </button>
               </div>
             </form>
