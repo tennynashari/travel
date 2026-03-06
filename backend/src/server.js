@@ -12,6 +12,7 @@ const bookingRoutes = require('./routes/booking.routes');
 const paymentRoutes = require('./routes/payment.routes');
 const checkinRoutes = require('./routes/checkin.routes');
 const laporanRoutes = require('./routes/laporan.routes');
+const seatTemplateRoutes = require('./routes/seatTemplate.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -38,6 +39,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/checkin', checkinRoutes);
 app.use('/api/laporan', laporanRoutes);
+app.use('/api/seat-templates', seatTemplateRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

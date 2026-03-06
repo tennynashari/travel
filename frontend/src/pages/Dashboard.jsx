@@ -5,6 +5,7 @@ import { authService } from '../services/api';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import MasterKota from './MasterKota';
 import MasterRute from './MasterRute';
+import MasterTemplateKursi from './MasterTemplateKursi';
 import MasterArmada from './MasterArmada';
 import MasterDriver from './MasterDriver';
 import JadwalPerjalanan from './JadwalPerjalanan';
@@ -52,6 +53,9 @@ function Dashboard({ user, page = 'dashboard' }) {
         break;
       case 'rute':
         navigate('/master-rute');
+        break;
+      case 'template-kursi':
+        navigate('/master-template-kursi');
         break;
       case 'armada':
         navigate('/master-armada');
@@ -112,6 +116,7 @@ function Dashboard({ user, page = 'dashboard' }) {
         submenus: [
           { id: 'kota', label: t('sidebar.masterCity'), icon: '🏙️', roles: ['ADMIN', 'OPERATOR'] },
           { id: 'rute', label: t('sidebar.masterRoute'), icon: '🗺️', roles: ['ADMIN', 'OPERATOR'] },
+          { id: 'template-kursi', label: 'Master Template Kursi', icon: '🪑', roles: ['ADMIN', 'OPERATOR'] },
           { id: 'driver', label: t('sidebar.masterDriver'), icon: '👨‍✈️', roles: ['ADMIN', 'OPERATOR'] },
           { id: 'armada', label: t('sidebar.masterVehicle'), icon: '🚐', roles: ['ADMIN', 'OPERATOR'] },
         ]
@@ -305,6 +310,7 @@ function Dashboard({ user, page = 'dashboard' }) {
           {activeMenu === 'rute' && <MasterRute />}
           {activeMenu === 'armada' && <MasterArmada />}
           {activeMenu === 'driver' && <MasterDriver />}
+          {activeMenu === 'template-kursi' && <MasterTemplateKursi />}
           {activeMenu === 'jadwal' && <JadwalPerjalanan />}
           {activeMenu === 'booking' && <BookingTiket />}
           {activeMenu === 'pembayaran' && <Pembayaran />}

@@ -6,6 +6,9 @@ const prisma = new PrismaClient();
 exports.getVehicles = async (req, res) => {
   try {
     const vehicles = await prisma.vehicle.findMany({
+      include: {
+        seatTemplate: true
+      },
       orderBy: {
         createdAt: 'desc'
       }
@@ -27,7 +30,10 @@ exports.getVehicleById = async (req, res) => {
     const { id } = req.params;
 
     const vehicle = await prisma.vehicle.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        seatTemplate: true
+      }
     });
 
     if (!vehicle) {
@@ -47,13 +53,22 @@ exports.getVehicleById = async (req, res) => {
 // Create vehicle
 exports.createVehicle = async (req, res) => {
   try {
-    const { plateNumber, vehicleType, capacity, status } = req.body;
+    const { plateNumber, vehicleType, seatTemplateId, status } = req.body;
 
     // Validation
-    if (!plateNumber || !vehicleType || !capacity) {
+    if (!plateNumber || !vehicleType || !seatTemplateId) {
       return res.status(400).json({ 
-        error: 'Plate number, vehicle type, and capacity are required' 
+        error: 'Plate number, vehicle type, and seat template are required' 
       });
+    }
+
+    // Check if seat template exists
+    const seatTemplate = await prisma.seatTemplate.findUnique({
+      where: { id: seatTemplateId }
+    });
+
+    if (!seatTemplate) {
+      return res.status(400).json({ error: 'Seat template not found' });
     }
 
     // Check if plate number already exists
@@ -69,8 +84,12 @@ exports.createVehicle = async (req, res) => {
       data: {
         plateNumber,
         vehicleType,
-        capacity: parseInt(capacity),
+        capacity: seatTemplate.totalSeats,
+        seatTemplateId,
         status: status || 'ACTIVE'
+      },
+      include: {
+        seatTemplate: true
       }
     });
 
@@ -88,13 +107,22 @@ exports.createVehicle = async (req, res) => {
 exports.updateVehicle = async (req, res) => {
   try {
     const { id } = req.params;
-    const { plateNumber, vehicleType, capacity, status } = req.body;
+    const { plateNumber, vehicleType, seatTemplateId, status } = req.body;
 
     // Validation
-    if (!plateNumber || !vehicleType || !capacity) {
+    if (!plateNumber || !vehicleType || !seatTemplateId) {
       return res.status(400).json({ 
-        error: 'Plate number, vehicle type, and capacity are required' 
+        error: 'Plate number, vehicle type, and seat template are required' 
       });
+    }
+
+    // Check if seat template exists
+    const seatTemplate = await prisma.seatTemplate.findUnique({
+      where: { id: seatTemplateId }
+    });
+
+    if (!seatTemplate) {
+      return res.status(400).json({ error: 'Seat template not found' });
     }
 
     // Check if vehicle exists
@@ -122,8 +150,12 @@ exports.updateVehicle = async (req, res) => {
       data: {
         plateNumber,
         vehicleType,
-        capacity: parseInt(capacity),
+        capacity: seatTemplate.totalSeats,
+        seatTemplateId,
         status: status || 'ACTIVE'
+      },
+      include: {
+        seatTemplate: true
       }
     });
 

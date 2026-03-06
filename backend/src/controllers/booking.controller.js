@@ -162,7 +162,11 @@ const getAvailableSeats = async (req, res) => {
     const schedule = await prisma.schedule.findUnique({
       where: { id: scheduleId },
       include: {
-        vehicle: true,
+        vehicle: {
+          include: {
+            seatTemplate: true
+          }
+        },
         bookings: {
           where: {
             status: {
@@ -195,6 +199,7 @@ const getAvailableSeats = async (req, res) => {
     res.json({
       success: true,
       data: {
+        schedule: schedule,  // Include full schedule with vehicle and seatTemplate
         totalSeats: schedule.vehicle.capacity,
         availableSeats: availableSeats,
         bookedSeats: bookedSeats,

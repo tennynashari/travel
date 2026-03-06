@@ -85,17 +85,36 @@ model Route {
   @@map("routes")
 }
 
-model Vehicle {
-  id            String        @id @default(uuid())
-  plateNumber   String        @unique
-  vehicleType   String
-  capacity      Int
-  status        VehicleStatus @default(ACTIVE)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+model SeatTemplate {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  rowsConfig  Json     // Array of seats per row, e.g., [2, 2, 2, 2, 2, 2]
+  totalSeats  Int
+  isActive    Boolean  @default(true)
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
-  schedules     Schedule[]
+  vehicles    Vehicle[]
+
+  @@map("seat_templates")
+}
+
+model Vehicle {
+  id             String        @id @default(uuid())
+  plateNumber    String        @unique
+  vehicleType    String
+  capacity       Int
+  seatTemplateId String?
+  status         VehicleStatus @default(ACTIVE)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  seatTemplate   SeatTemplate?  @relation(fields: [seatTemplateId], references: [id])
+  schedules      Schedule[]
 
   @@map("vehicles")
 }

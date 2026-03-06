@@ -49,6 +49,14 @@ function App() {
           } 
         />
         <Route 
+          path="/master-template-kursi" 
+          element={
+            <ProtectedRoute>
+              <Dashboard user={user} page="template-kursi" />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="/master-armada" 
           element={
             <ProtectedRoute>

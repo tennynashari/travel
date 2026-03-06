@@ -6,6 +6,7 @@ import Pagination from '../components/Pagination';
 function MasterArmada() {
   const { t } = useTranslation();
   const [vehicles, setVehicles] = useState([]);
+  const [seatTemplates, setSeatTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -13,7 +14,7 @@ function MasterArmada() {
     id: '',
     plateNumber: '',
     vehicleType: '',
-    capacity: '',
+    seatTemplateId: '',
     status: 'ACTIVE'
   });
   const [error, setError] = useState('');
@@ -23,7 +24,17 @@ function MasterArmada() {
 
   useEffect(() => {
     fetchVehicles();
+    fetchSeatTemplates();
   }, []);
+
+  const fetchSeatTemplates = async () => {
+    try {
+      const response = await api.get('/seat-templates?isActive=true');
+      setSeatTemplates(response.data.data);
+    } catch (err) {
+      console.error('Error fetching seat templates:', err);
+    }
+  };
 
   const fetchVehicles = async () => {
     try {
@@ -41,14 +52,17 @@ function MasterArmada() {
   const handleOpenModal = (vehicle = null) => {
     if (vehicle) {
       setEditMode(true);
-      setCurrentVehicle(vehicle);
+      setCurrentVehicle({
+        ...vehicle,
+        seatTemplateId: vehicle.seatTemplateId || vehicle.seatTemplate?.id || ''
+      });
     } else {
       setEditMode(false);
       setCurrentVehicle({
         id: '',
         plateNumber: '',
         vehicleType: '',
-        capacity: '',
+        seatTemplateId: '',
         status: 'ACTIVE'
       });
     }
@@ -201,7 +215,14 @@ function MasterArmada() {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">{vehicle.vehicleType}</td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{vehicle.capacity} kursi</td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm">
+                          <div className="text-gray-800 font-medium">{vehicle.capacity} kursi</div>
+                          {vehicle.seatTemplate && (
+                            <div className="text-xs text-gray-500">{vehicle.seatTemplate.name}</div>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-6 py-4">
                         <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${getStatusBadge(vehicle.status)}`}>
                           {getStatusLabel(vehicle.status)}
@@ -294,18 +315,26 @@ function MasterArmada() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('masterVehicle.capacity')} *
+                    Template Kursi *
                   </label>
-                  <input
-                    type="number"
-                    value={currentVehicle.capacity}
-                    onChange={(e) => setCurrentVehicle({ ...currentVehicle, capacity: e.target.value })}
+                  <select
+                    value={currentVehicle.seatTemplateId}
+                    onChange={(e) => setCurrentVehicle({ ...currentVehicle, seatTemplateId: e.target.value })}
                     required
-                    min="1"
-                    max="60"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    placeholder={t('masterVehicle.enterCapacity')}
-                  />
+                  >
+                    <option value="">Pilih Template Kursi</option>
+                    {seatTemplates.map(template => (
+                      <option key={template.id} value={template.id}>
+                        {template.name} ({template.totalSeats} kursi)
+                      </option>
+                    ))}
+                  </select>
+                  {currentVehicle.seatTemplateId && (
+                    <p className="mt-2 text-sm text-gray-600">
+                      {t('masterVehicle.capacity')}: {seatTemplates.find(t => t.id === currentVehicle.seatTemplateId)?.totalSeats || '-'} kursi
+                    </p>
+                  )}
                 </div>
 
                 <div>
