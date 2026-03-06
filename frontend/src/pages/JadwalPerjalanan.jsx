@@ -62,24 +62,38 @@ function JadwalPerjalanan() {
 
   // Memoized sorted schedules
   const sortedSchedules = useMemo(() => {
-    console.log('Sorting schedules with order:', sortOrder);
-    console.log('Number of schedules:', schedules.length);
+    if (schedules.length === 0) return [];
+    
+    console.log('Sample schedule:', schedules[0]);
+    console.log('departureDate type:', typeof schedules[0]?.departureDate);
+    console.log('departureDate value:', schedules[0]?.departureDate);
     
     const sorted = [...schedules].sort((a, b) => {
-      // Combine date and time for comparison
-      const dateTimeA = new Date(`${a.departureDate}T${a.departureTime}`);
-      const dateTimeB = new Date(`${b.departureDate}T${b.departureTime}`);
+      // Parse date string properly
+      // departureDate from API is in ISO format: "2026-03-10T00:00:00.000Z"
+      const dateA = new Date(a.departureDate);
+      const dateB = new Date(b.departureDate);
       
-      console.log('Comparing:', dateTimeA, 'vs', dateTimeB);
+      // Parse time (format: "HH:MM")
+      const [hoursA, minutesA] = a.departureTime.split(':').map(Number);
+      const [hoursB, minutesB] = b.departureTime.split(':').map(Number);
+      
+      // Set the time on the date objects
+      dateA.setHours(hoursA, minutesA, 0, 0);
+      dateB.setHours(hoursB, minutesB, 0, 0);
       
       if (sortOrder === 'asc') {
-        return dateTimeA - dateTimeB;
+        return dateA - dateB;
       } else {
-        return dateTimeB - dateTimeA;
+        return dateB - dateA;
       }
     });
     
-    console.log('Sorted result (first 3):', sorted.slice(0, 3).map(s => ({ date: s.departureDate, time: s.departureTime })));
+    console.log('Sorted (first 3):', sorted.slice(0, 3).map(s => ({ 
+      date: s.departureDate, 
+      time: s.departureTime,
+      route: s.route?.originCity?.name + ' → ' + s.route?.destinationCity?.name
+    })));
     return sorted;
   }, [schedules, sortOrder]);
 
