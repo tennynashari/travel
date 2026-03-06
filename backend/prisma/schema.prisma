@@ -36,6 +36,13 @@ enum DriverStatus {
   INACTIVE
 }
 
+enum RecurringType {
+  NONE
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -135,7 +142,7 @@ model Driver {
 }
 
 model Schedule {
-  id              String   @id @default(uuid())
+  id              String         @id @default(uuid())
   routeId         String
   vehicleId       String
   driverId        String
@@ -143,14 +150,24 @@ model Schedule {
   departureTime   String
   ticketPrice     Int
   availableSeats  Int
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  // Template & Recurring fields
+  isTemplate      Boolean        @default(false)
+  recurringType   RecurringType  @default(NONE)
+  recurringDays   Json?          // [0,1,2,3,4,5,6] for Sunday-Saturday
+  templateName    String?
+  isActive        Boolean        @default(true)
+  sourceTemplateId String?
 
   // Relations
-  route           Route    @relation(fields: [routeId], references: [id])
-  vehicle         Vehicle  @relation(fields: [vehicleId], references: [id])
-  driver          Driver   @relation(fields: [driverId], references: [id])
+  route           Route          @relation(fields: [routeId], references: [id])
+  vehicle         Vehicle        @relation(fields: [vehicleId], references: [id])
+  driver          Driver         @relation(fields: [driverId], references: [id])
   bookings        Booking[]
+  sourceTemplate  Schedule?      @relation("TemplateSchedules", fields: [sourceTemplateId], references: [id], onDelete: SetNull)
+  generatedSchedules Schedule[]  @relation("TemplateSchedules")
 
   @@map("schedules")
 }
