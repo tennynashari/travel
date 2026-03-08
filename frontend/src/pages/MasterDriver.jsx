@@ -139,19 +139,19 @@ function MasterDriver() {
   return (
     <div>
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">{t('masterDriver.title')}</h1>
-          <p className="text-gray-600 mt-1">{t('masterDriver.subtitle')}</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">{t('masterDriver.title')}</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">{t('masterDriver.subtitle')}</p>
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center"
+          className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          {t('masterDriver.addDriver')}
+          <span className="text-sm sm:text-base">{t('masterDriver.addDriver')}</span>
         </button>
       </div>
 
@@ -175,7 +175,9 @@ function MasterDriver() {
             <p className="text-gray-600 mt-2">{t('common.loading')}</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          {/* Desktop Table */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -252,6 +254,59 @@ function MasterDriver() {
               </tbody>
             </table>
           </div>
+          
+          {/* Mobile Card View */}
+          <div className="lg:hidden">
+            {drivers.length === 0 ? (
+              <div className="px-6 py-8 text-center text-gray-500">
+                {t('common.noData')}
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-200">
+                {drivers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((driver, index) => (
+                  <div key={driver.id} className="p-4 hover:bg-gray-50">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="flex-shrink-0 h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-2xl">👨‍✈️</span>
+                      </div>
+                      <div className="flex-1">
+                        <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs font-medium mb-1">
+                          #{(currentPage - 1) * itemsPerPage + index + 1}
+                        </span>
+                        <p className="text-sm font-bold text-gray-800">{driver.user.name}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{driver.user.email}</p>
+                        {driver.user.phone && (
+                          <p className="text-xs text-gray-500">{driver.user.phone}</p>
+                        )}
+                      </div>
+                      <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${getStatusBadge(driver.status)}`}>
+                        {getStatusLabel(driver.status)}
+                      </span>
+                    </div>
+                    <div className="mb-3 pb-3 border-b border-gray-100">
+                      <span className="text-xs text-gray-500">Nomor SIM:</span>
+                      <p className="text-sm font-medium text-gray-800">{driver.licenseNumber}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleOpenModal(driver)}
+                        className="flex-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg font-medium transition"
+                      >
+                        {t('common.edit')}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(driver.id, driver.user.name)}
+                        className="flex-1 text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2 rounded-lg font-medium transition"
+                      >
+                        {t('common.delete')}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          </>
         )}
         {!loading && drivers.length > 0 && (
           <Pagination

@@ -322,11 +322,11 @@ function Dashboard({ user, page = 'dashboard' }) {
           {activeMenu === 'dashboard' && (
             <>
               {/* Welcome Section */}
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-800 mb-2">
+              <div className="mb-6 sm:mb-8">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-2">
                   {t('common.welcome')}, {currentUser?.name}! 👋
                 </h1>
-                <p className="text-gray-600">{t('dashboard.subtitle')}</p>
+                <p className="text-sm sm:text-base text-gray-600">{t('dashboard.subtitle')}</p>
               </div>
 
               {/* Stats Grid */}
@@ -345,15 +345,16 @@ function Dashboard({ user, page = 'dashboard' }) {
               </div>
 
               {/* Recent Bookings */}
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-800">{t('dashboard.recentBookings')}</h2>
-                  <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">
+              <div className="bg-white rounded-xl shadow-md p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-800">{t('dashboard.recentBookings')}</h2>
+                  <button className="text-blue-600 hover:text-blue-700 font-medium text-sm text-left sm:text-right">
                     {t('dashboard.viewAll')} →
                   </button>
                 </div>
 
-                <div className="overflow-x-auto">
+                {/* Desktop Table View - Hidden on mobile */}
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-gray-50">
                       <tr>
@@ -396,6 +397,28 @@ function Dashboard({ user, page = 'dashboard' }) {
                       ))}
                     </tbody>
                   </table>
+                </div>
+
+                {/* Mobile Card View - Shown only on mobile */}
+                <div className="md:hidden space-y-3">
+                  {recentBookings.map((booking, index) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <p className="text-sm font-semibold text-gray-800">{booking.code}</p>
+                          <p className="text-xs text-gray-500 mt-1">{booking.route}</p>
+                        </div>
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${
+                          booking.status === 'PAID' ? 'bg-green-100 text-green-800' :
+                          booking.status === 'CONFIRMED' ? 'bg-blue-100 text-blue-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {booking.status}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600">{booking.customer}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </>

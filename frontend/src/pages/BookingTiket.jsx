@@ -282,7 +282,9 @@ function BookingTiket() {
             <p className="text-gray-600 mt-2">{t('common.loading')}</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          {/* Desktop Table View - Hidden on mobile */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -414,6 +416,109 @@ function BookingTiket() {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile Card View - Shown only on mobile */}
+          <div className="lg:hidden">
+            {bookings.length === 0 ? (
+              <div className="px-6 py-8 text-center text-gray-500">
+                {t('common.noData')}
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-200">
+                {bookings.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((booking) => (
+                  <div key={booking.id} className="p-4 hover:bg-gray-50">
+                    {/* Header: Booking Code & Status */}
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <p className="text-sm font-bold text-gray-800">{booking.bookingCode}</p>
+                        <p className="text-xs text-gray-500 mt-1">{formatDate(booking.createdAt)}</p>
+                      </div>
+                      <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${getStatusBadge(booking.status)}`}>
+                        {getStatusLabel(booking.status)}
+                      </span>
+                    </div>
+
+                    {/* Route & Schedule */}
+                    <div className="mb-3 pb-3 border-b border-gray-100">
+                      <p className="text-sm font-medium text-gray-800 mb-1">
+                        {booking.schedule?.route?.originCity?.name || 'N/A'} → {booking.schedule?.route?.destinationCity?.name || 'N/A'}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {formatDate(booking.schedule?.departureDate)} • {booking.schedule?.departureTime}
+                      </p>
+                    </div>
+
+                    {/* Details Grid */}
+                    <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
+                      {isAdmin && (
+                        <div>
+                          <span className="text-gray-500">{t('booking.customer')}:</span>
+                          <p className="font-medium text-gray-800">{booking.user.name}</p>
+                        </div>
+                      )}
+                      <div>
+                        <span className="text-gray-500">{t('booking.seat')}:</span>
+                        <p className="font-medium text-gray-800">{booking.seatNumbers.join(', ')}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-gray-500">{t('booking.total')}:</span>
+                        <p className="font-bold text-gray-800 text-sm">{formatCurrency(booking.totalPrice)}</p>
+                      </div>
+                      {booking.paymentMethod && (
+                        <div className="col-span-2">
+                          <span className="text-gray-500">Payment:</span>
+                          <p className="font-medium text-gray-800">{booking.paymentMethod}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100">
+                      {booking.status === 'PENDING' && (
+                        <button
+                          onClick={() => handleShowPaymentInfo(booking)}
+                          className="flex-1 min-w-[120px] text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg font-medium transition flex items-center justify-center"
+                        >
+                          <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          {t('booking.viewPaymentInfo')}
+                        </button>
+                      )}
+                      {isAdmin && booking.status === 'PENDING' && (
+                        <button
+                          onClick={() => {
+                            const method = prompt(t('booking.enterPaymentMethod'));
+                            if (method) handleUpdateStatus(booking.id, 'PAID', method);
+                          }}
+                          className="flex-1 min-w-[120px] text-xs bg-green-50 text-green-600 hover:bg-green-100 px-3 py-2 rounded-lg font-medium transition"
+                        >
+                          {t('booking.confirmPayment')}
+                        </button>
+                      )}
+                      {isAdmin && booking.status === 'PAID' && (
+                        <button
+                          onClick={() => handleUpdateStatus(booking.id, 'CONFIRMED')}
+                          className="flex-1 min-w-[120px] text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg font-medium transition"
+                        >
+                          {t('booking.confirm')}
+                        </button>
+                      )}
+                      {booking.status === 'PENDING' && (
+                        <button
+                          onClick={() => handleCancelBooking(booking.id, booking.bookingCode)}
+                          className="flex-1 min-w-[120px] text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2 rounded-lg font-medium transition"
+                        >
+                          {t('booking.cancel')}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          </>
         )}
         {!loading && bookings.length > 0 && (
           <Pagination
@@ -427,8 +532,8 @@ function BookingTiket() {
 
       {/* Booking Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white">
               <h2 className="text-xl font-bold text-gray-800">{t('booking.newBooking')}</h2>
             </div>
@@ -535,8 +640,8 @@ function BookingTiket() {
 
       {/* Seat Selection Modal */}
       {showSeatModal && availableSeats && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-2 sm:p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[95vh] sm:max-h-auto overflow-y-auto">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-bold text-gray-800">{t('booking.seatSelection')}</h3>
               <p className="text-sm text-gray-600 mt-1">
@@ -659,8 +764,8 @@ function BookingTiket() {
         };
         
         return (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
               <div className="px-6 py-4 border-b border-gray-200 bg-green-50">
                 <div className="flex items-center">
                   <svg className="w-8 h-8 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

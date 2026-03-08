@@ -137,19 +137,19 @@ function MasterArmada() {
   return (
     <div>
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">{t('masterVehicle.title')}</h1>
-          <p className="text-gray-600 mt-1">{t('masterVehicle.subtitle')}</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">{t('masterVehicle.title')}</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">{t('masterVehicle.subtitle')}</p>
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center"
+          className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          {t('masterVehicle.addVehicle')}
+          <span className="text-sm sm:text-base">{t('masterVehicle.addVehicle')}</span>
         </button>
       </div>
 
@@ -173,7 +173,9 @@ function MasterArmada() {
             <p className="text-gray-600 mt-2">{t('common.loading')}</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          {/* Desktop Table */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -250,6 +252,57 @@ function MasterArmada() {
               </tbody>
             </table>
           </div>
+          
+          {/* Mobile Card View */}
+          <div className="lg:hidden">
+            {vehicles.length === 0 ? (
+              <div className="px-6 py-8 text-center text-gray-500">
+                {t('common.noData')}
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-200">
+                {vehicles.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((vehicle, index) => (
+                  <div key={vehicle.id} className="p-4 hover:bg-gray-50">
+                    <div className="flex items-start gap-3 mb-3">
+                      <span className="text-3xl">🚐</span>
+                      <div className="flex-1">
+                        <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs font-medium mb-1">
+                          #{(currentPage - 1) * itemsPerPage + index + 1}
+                        </span>
+                        <p className="text-sm font-bold text-gray-800">{vehicle.plateNumber}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{vehicle.vehicleType}</p>
+                      </div>
+                      <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${getStatusBadge(vehicle.status)}`}>
+                        {getStatusLabel(vehicle.status)}
+                      </span>
+                    </div>
+                    <div className="mb-3 pb-3 border-b border-gray-100">
+                      <span className="text-xs text-gray-500">Kapasitas:</span>
+                      <p className="text-sm font-medium text-gray-800">{vehicle.capacity} kursi</p>
+                      {vehicle.seatTemplate && (
+                        <p className="text-xs text-gray-500 mt-1">Template: {vehicle.seatTemplate.name}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleOpenModal(vehicle)}
+                        className="flex-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg font-medium transition"
+                      >
+                        {t('common.edit')}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(vehicle.id, vehicle.plateNumber)}
+                        className="flex-1 text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2 rounded-lg font-medium transition"
+                      >
+                        {t('common.delete')}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          </>
         )}
         {!loading && vehicles.length > 0 && (
           <Pagination

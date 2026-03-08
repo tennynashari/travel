@@ -98,19 +98,19 @@ function MasterKota() {
   return (
     <div>
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">{t('masterCity.title')}</h1>
-          <p className="text-gray-600 mt-1">{t('masterCity.subtitle')}</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">{t('masterCity.title')}</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">{t('masterCity.subtitle')}</p>
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center"
+          className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          {t('masterCity.addCity')}
+          <span className="text-sm sm:text-base">{t('masterCity.addCity')}</span>
         </button>
       </div>
 
@@ -134,7 +134,9 @@ function MasterKota() {
             <p className="text-gray-600 mt-2">{t('common.loading')}</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -187,6 +189,46 @@ function MasterKota() {
               </tbody>
             </table>
           </div>
+          
+          {/* Mobile Card View */}
+          <div className="md:hidden">
+            {cities.length === 0 ? (
+              <div className="px-6 py-8 text-center text-gray-500">
+                {t('common.noData')}
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-200">
+                {cities.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((city, index) => (
+                  <div key={city.id} className="p-4 hover:bg-gray-50">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs font-medium mb-1">
+                          #{(currentPage - 1) * itemsPerPage + index + 1}
+                        </span>
+                        <p className="text-sm font-bold text-gray-800">{city.name}</p>
+                        <p className="text-xs text-gray-500 mt-1">{city.province}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 pt-2 border-t border-gray-100">
+                      <button
+                        onClick={() => handleOpenModal(city)}
+                        className="flex-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg font-medium transition"
+                      >
+                        {t('common.edit')}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(city.id, city.name)}
+                        className="flex-1 text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2 rounded-lg font-medium transition"
+                      >
+                        {t('common.delete')}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          </>
         )}
         {!loading && cities.length > 0 && (
           <Pagination

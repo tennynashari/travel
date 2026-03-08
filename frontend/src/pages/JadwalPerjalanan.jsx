@@ -419,71 +419,84 @@ function JadwalPerjalanan() {
   return (
     <div>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">{t('schedule.title')}</h1>
-          <p className="text-gray-600 mt-1">{t('schedule.subtitle')}</p>
+      <div className="mb-4 sm:mb-6">
+        <div className="mb-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">{t('schedule.title')}</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">{t('schedule.subtitle')}</p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+        
+        {/* Controls Section */}
+        <div className="flex flex-col gap-3">
+          {/* Row 1: Date, Sort, Add Button */}
+          <div className="flex flex-wrap gap-2">
+            {activeTab === 'schedules' && (
+              <>
+                <input
+                  type="date"
+                  value={filterDate}
+                  onChange={(e) => setFilterDate(e.target.value)}
+                  className="flex-1 min-w-[140px] px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                />
+                <select
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value)}
+                  className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white"
+                >
+                  <option value="asc">↑ Terlama</option>
+                  <option value="desc">↓ Terbaru</option>
+                </select>
+              </>
+            )}
+            <button
+              onClick={() => handleOpenModal(null, activeTab === 'templates')}
+              className="flex-1 sm:flex-initial bg-blue-600 text-white px-3 sm:px-4 py-2 text-sm rounded-lg hover:bg-blue-700 transition flex items-center justify-center whitespace-nowrap"
+            >
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              {activeTab === 'schedules' ? t('schedule.addSchedule') : 'Tambah Template'}
+            </button>
+          </div>
+          
+          {/* Row 2: Action Buttons (only for schedules tab) */}
           {activeTab === 'schedules' && (
-            <>
-              <input
-                type="date"
-                value={filterDate}
-                onChange={(e) => setFilterDate(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              />
-              <select
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white"
-              >
-                <option value="asc">↑ Terlama</option>
-                <option value="desc">↓ Terbaru</option>
-              </select>
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setShowSyncModal(true)}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center justify-center whitespace-nowrap"
+                className="flex-1 sm:flex-initial bg-green-600 text-white px-3 sm:px-4 py-2 text-sm rounded-lg hover:bg-green-700 transition flex items-center justify-center whitespace-nowrap"
               >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                Sinkronisasi
+                <span className="hidden sm:inline">Sinkronisasi</span>
+                <span className="sm:hidden">Sync</span>
               </button>
               <button
                 onClick={handleDeletePastSchedules}
                 disabled={pastSchedulesCount === 0}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center justify-center whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed relative"
+                className="flex-1 sm:flex-initial bg-red-600 text-white px-3 sm:px-4 py-2 text-sm rounded-lg hover:bg-red-700 transition flex items-center justify-center whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed relative"
               >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
-                Hapus Jadwal Lewat
+                <span className="hidden sm:inline">Hapus Jadwal Lewat</span>
+                <span className="sm:hidden">Hapus Lewat</span>
                 {pastSchedulesCount > 0 && (
-                  <span className="ml-2 bg-white text-red-600 px-2 py-0.5 rounded-full text-xs font-bold">
+                  <span className="ml-1 sm:ml-2 bg-white text-red-600 px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-bold">
                     {pastSchedulesCount}
                   </span>
                 )}
               </button>
-            </>
+            </div>
           )}
-          <button
-            onClick={() => handleOpenModal(null, activeTab === 'templates')}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            {activeTab === 'schedules' ? t('schedule.addSchedule') : 'Tambah Template'}
-          </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 mb-6">
+      <div className="flex border-b border-gray-200 mb-4 sm:mb-6 overflow-x-auto">
         <button
           onClick={() => setActiveTab('schedules')}
-          className={`px-6 py-3 font-medium transition ${
+          className={`px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium transition whitespace-nowrap ${
             activeTab === 'schedules'
               ? 'border-b-2 border-blue-600 text-blue-600'
               : 'text-gray-500 hover:text-gray-700'
@@ -493,7 +506,7 @@ function JadwalPerjalanan() {
         </button>
         <button
           onClick={() => setActiveTab('templates')}
-          className={`px-6 py-3 font-medium transition ${
+          className={`px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium transition whitespace-nowrap ${
             activeTab === 'templates'
               ? 'border-b-2 border-blue-600 text-blue-600'
               : 'text-gray-500 hover:text-gray-700'
@@ -524,7 +537,9 @@ function JadwalPerjalanan() {
               <p className="text-gray-600 mt-2">{t('common.loading')}</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+            {/* Desktop Table View */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -619,6 +634,88 @@ function JadwalPerjalanan() {
                 </tbody>
               </table>
             </div>
+            
+            {/* Mobile Card View */}
+            <div className="lg:hidden">
+              {sortedSchedules.length === 0 ? (
+                <div className="px-6 py-8 text-center text-gray-500">
+                  {filterDate ? t('schedule.noScheduleOnDate') : t('common.noData')}
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-200">
+                  {sortedSchedules.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((schedule, index) => (
+                    <div key={schedule.id} className="p-4 hover:bg-gray-50">
+                      {/* Header: Number & Route */}
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs font-medium">
+                              #{(currentPage - 1) * itemsPerPage + index + 1}
+                            </span>
+                            <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${getSeatsStatus(schedule.availableSeats, schedule.vehicle.capacity)}`}>
+                              {schedule.availableSeats}/{schedule.vehicle.capacity} kursi
+                            </span>
+                          </div>
+                          <p className="text-sm font-bold text-gray-800">
+                            {schedule.route.originCity.name} → {schedule.route.destinationCity.name}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            {schedule.route.originCity.province} - {schedule.route.destinationCity.province}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Date & Time */}
+                      <div className="mb-3 pb-3 border-b border-gray-100">
+                        <div className="flex items-center gap-2 text-sm">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span className="font-medium text-gray-800">{formatDate(schedule.departureDate)}</span>
+                          <span className="text-gray-400">•</span>
+                          <span className="text-gray-600">{formatTime(schedule.departureTime)} WIB</span>
+                        </div>
+                      </div>
+
+                      {/* Details Grid */}
+                      <div className="grid grid-cols-2 gap-3 mb-3 text-xs">
+                        <div>
+                          <span className="text-gray-500 block mb-1">Kendaraan:</span>
+                          <p className="font-medium text-gray-800">{schedule.vehicle.vehicleType}</p>
+                          <p className="text-gray-500">{schedule.vehicle.plateNumber}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500 block mb-1">Driver:</span>
+                          <p className="font-medium text-gray-800">{schedule.driver.user.name}</p>
+                          <p className="text-gray-500">{schedule.driver.licenseNumber}</p>
+                        </div>
+                        <div className="col-span-2">
+                          <span className="text-gray-500 block mb-1">Harga Tiket:</span>
+                          <p className="font-bold text-blue-600 text-sm">{formatCurrency(schedule.ticketPrice)}</p>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex gap-2 pt-3 border-t border-gray-100">
+                        <button
+                          onClick={() => handleOpenModal(schedule)}
+                          className="flex-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg font-medium transition"
+                        >
+                          {t('common.edit')}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(schedule.id, `${schedule.route.originCity.name} - ${schedule.route.destinationCity.name}`)}
+                          className="flex-1 text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2 rounded-lg font-medium transition"
+                        >
+                          {t('common.delete')}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            </>
           )}
           {!loading && sortedSchedules.length > 0 && (
             <Pagination
