@@ -79,9 +79,6 @@ function Dashboard({ user, page = 'dashboard' }) {
       case 'laporan':
         navigate('/laporan');
         break;
-      case 'ai':
-        navigate('/dashboard');
-        break;
       case 'users':
         navigate('/manajemen-user');
         break;
@@ -130,7 +127,6 @@ function Dashboard({ user, page = 'dashboard' }) {
       { id: 'pembayaran', label: t('sidebar.payment'), icon: '💳', roles: ['ADMIN', 'OPERATOR'] },
       { id: 'checkin', label: t('sidebar.checkIn'), icon: '✅', roles: ['ADMIN', 'OPERATOR', 'DRIVER'] },
       { id: 'laporan', label: t('sidebar.reports'), icon: '📈', roles: ['ADMIN', 'OPERATOR'] },
-      { id: 'ai', label: t('sidebar.aiPrediction'), icon: '🤖', roles: ['ADMIN', 'OPERATOR'] },
       { id: 'users', label: t('sidebar.userManagement'), icon: '👥', roles: ['ADMIN'] },
     ];
 
@@ -321,7 +317,6 @@ function Dashboard({ user, page = 'dashboard' }) {
           {activeMenu === 'pembayaran' && <Pembayaran />}
           {activeMenu === 'checkin' && <CheckIn />}
           {activeMenu === 'laporan' && <Laporan />}
-          {activeMenu === 'ai' && <AIPrediction />}
           {activeMenu === 'users' && <ManajemenUser />}
           
           {/* Dashboard Home (default) */}
@@ -427,11 +422,16 @@ function Dashboard({ user, page = 'dashboard' }) {
                   ))}
                 </div>
               </div>
+
+              {/* AI Prediction Section */}
+              <div className="mt-8">
+                <AIPrediction />
+              </div>
             </>
           )}
 
           {/* Placeholder for other menus */}
-          {!['dashboard', 'kota', 'rute', 'armada', 'driver', 'jadwal', 'booking', 'pembayaran', 'checkin', 'laporan', 'users'].includes(activeMenu) && (
+          {!['dashboard', 'kota', 'rute', 'armada', 'driver', 'jadwal', 'booking', 'pembayaran', 'checkin', 'laporan', 'users', 'template-kursi'].includes(activeMenu) && (
             <div className="bg-white rounded-xl shadow-md p-12 text-center">
               <div className="text-6xl mb-4">🚧</div>
               <h2 className="text-2xl font-bold text-gray-800 mb-2">{t('dashboard.comingSoon')}</h2>
