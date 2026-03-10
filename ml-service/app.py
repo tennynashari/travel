@@ -134,10 +134,14 @@ def model_info():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
+    port = int(os.getenv('PORT', 5020))
+    debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+    
     print("=" * 60)
     print("🚀 Travel ML Service Starting...")
     print("=" * 60)
     print(f"📁 Model directory: {MODEL_DIR}")
-    print(f"🌐 Running on: http://localhost:5001")
+    print(f"🌐 Running on: http://0.0.0.0:{port}")
+    print(f"🔧 Debug mode: {debug}")
     print("=" * 60)
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=debug)
