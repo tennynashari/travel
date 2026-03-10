@@ -1,17 +1,17 @@
 [Unit]
 Description=Travel ML Service - AI Prediction
 Documentation=https://github.com/yourusername/travel
-After=network.target travel-backend.service
+After=network.target
 
 [Service]
 Type=simple
-User=tazkia
-WorkingDirectory=/home/tazkia/travel/ml-service
-Environment=FLASK_ENV=production
-Environment=PORT=5001
+User=travel
+WorkingDirectory=/var/www/travel/ml-service
+Environment=PATH=/var/www/travel/ml-service/venv/bin:/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=/var/www/travel/ml-service/.env
 
-# Path to python and app
-ExecStart=/usr/bin/python3 app.py
+# Path to python and app (using virtual environment)
+ExecStart=/var/www/travel/ml-service/venv/bin/python app.py
 
 # Restart policy
 Restart=always
