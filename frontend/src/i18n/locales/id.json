@@ -35,7 +35,8 @@
     "payment": "Pembayaran",
     "checkIn": "Check-in Penumpang",
     "userManagement": "Manajemen User",
-    "reports": "Laporan"
+    "reports": "Laporan",
+    "aiPrediction": "Prediksi AI"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -436,5 +437,40 @@
     "bulkCheckInError": "Gagal melakukan bulk check-in",
     "loadScheduleError": "Gagal mengambil data jadwal",
     "loadBookingError": "Gagal mengambil data booking"
+  },
+  "ai": {
+    "title": "Prediksi AI & Analitik",
+    "subtitle": "Prediksi berbasis machine learning untuk optimasi bisnis",
+    "fetchTrain": "Fetch & Train",
+    "predict": "Prediksi",
+    "training": "Training...",
+    "predicting": "Memprediksi...",
+    "modelReady": "Model Siap",
+    "modelNotTrained": "Model Belum Dilatih",
+    "lastTrained": "Terakhir dilatih",
+    "trainSuccess": "✅ Model berhasil dilatih!",
+    "trainError": "❌ Gagal melatih model",
+    "predictSuccess": "✅ Prediksi berhasil dibuat!",
+    "predictError": "❌ Gagal membuat prediksi",
+    "noData": "Belum Ada Prediksi",
+    "clickTrain": "Klik 'Fetch & Train' untuk melatih model dengan data historis",
+    "clickPredict": "Klik 'Prediksi' untuk melihat prediksi",
+    "demandForecast": "Prediksi Permintaan Penumpang",
+    "next7Days": "Prediksi 7 hari ke depan",
+    "passengers": "Penumpang",
+    "predicted": "Prediksi",
+    "totalPredicted": "Total Prediksi",
+    "dailyAverage": "Rata-rata Harian",
+    "trend": "Tren",
+    "increasing": "Naik",
+    "decreasing": "Turun",
+    "stable": "Stabil",
+    "peakDays": "Hari Peak",
+    "topRoutes": "Top 3 Rute Terlaris",
+    "bottomRoutes": "Top 3 Rute Tersepi",
+    "bookings": "Booking",
+    "revenue": "Pendapatan",
+    "occupancy": "Tingkat Penuh",
+    "noBottomRoutes": "Semua rute memiliki performa baik"
   }
 }

@@ -14,6 +14,7 @@ import BookingTiket from './BookingTiket';
 import Pembayaran from './Pembayaran';
 import CheckIn from './CheckIn';
 import Laporan from './Laporan';
+import AIPrediction from '../components/AIPrediction';
 
 function Dashboard({ user, page = 'dashboard' }) {
   const { t } = useTranslation();
@@ -78,6 +79,9 @@ function Dashboard({ user, page = 'dashboard' }) {
       case 'laporan':
         navigate('/laporan');
         break;
+      case 'ai':
+        navigate('/ai-prediction');
+        break;
       case 'users':
         navigate('/manajemen-user');
         break;
@@ -126,6 +130,7 @@ function Dashboard({ user, page = 'dashboard' }) {
       { id: 'pembayaran', label: t('sidebar.payment'), icon: '💳', roles: ['ADMIN', 'OPERATOR'] },
       { id: 'checkin', label: t('sidebar.checkIn'), icon: '✅', roles: ['ADMIN', 'OPERATOR', 'DRIVER'] },
       { id: 'laporan', label: t('sidebar.reports'), icon: '📈', roles: ['ADMIN', 'OPERATOR'] },
+      { id: 'ai', label: t('sidebar.aiPrediction'), icon: '🤖', roles: ['ADMIN', 'OPERATOR'] },
       { id: 'users', label: t('sidebar.userManagement'), icon: '👥', roles: ['ADMIN'] },
     ];
 
@@ -316,6 +321,7 @@ function Dashboard({ user, page = 'dashboard' }) {
           {activeMenu === 'pembayaran' && <Pembayaran />}
           {activeMenu === 'checkin' && <CheckIn />}
           {activeMenu === 'laporan' && <Laporan />}
+          {activeMenu === 'ai' && <AIPrediction />}
           {activeMenu === 'users' && <ManajemenUser />}
           
           {/* Dashboard Home (default) */}

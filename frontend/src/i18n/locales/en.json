@@ -35,7 +35,8 @@
     "payment": "Payment",
     "checkIn": "Check-in Passengers",
     "userManagement": "User Management",
-    "reports": "Reports"
+    "reports": "Reports",
+    "aiPrediction": "AI Prediction"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -436,5 +437,40 @@
     "bulkCheckInError": "Failed to perform bulk check-in",
     "loadScheduleError": "Failed to load schedule data",
     "loadBookingError": "Failed to load booking data"
+  },
+  "ai": {
+    "title": "AI Prediction & Analytics",
+    "subtitle": "Machine learning predictions for business optimization",
+    "fetchTrain": "Fetch & Train",
+    "predict": "Predict",
+    "training": "Training...",
+    "predicting": "Predicting...",
+    "modelReady": "Model Ready",
+    "modelNotTrained": "Model Not Trained",
+    "lastTrained": "Last trained",
+    "trainSuccess": "✅ Model trained successfully!",
+    "trainError": "❌ Failed to train model",
+    "predictSuccess": "✅ Predictions generated successfully!",
+    "predictError": "❌ Failed to generate predictions",
+    "noData": "No Predictions Yet",
+    "clickTrain": "Click 'Fetch & Train' to train model with historical data",
+    "clickPredict": "Click 'Predict' to see predictions",
+    "demandForecast": "Passenger Demand Forecast",
+    "next7Days": "7-day forecast",
+    "passengers": "Passengers",
+    "predicted": "Predicted",
+    "totalPredicted": "Total Predicted",
+    "dailyAverage": "Daily Average",
+    "trend": "Trend",
+    "increasing": "Increasing",
+    "decreasing": "Decreasing",
+    "stable": "Stable",
+    "peakDays": "Peak Days",
+    "topRoutes": "Top 3 Best Routes",
+    "bottomRoutes": "Top 3 Worst Routes",
+    "bookings": "Bookings",
+    "revenue": "Revenue",
+    "occupancy": "Occupancy Rate",
+    "noBottomRoutes": "All routes performing well"
   }
 }

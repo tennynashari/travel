@@ -1,0 +1,26 @@
+[Unit]
+Description=Travel ML Service - AI Prediction
+Documentation=https://github.com/yourusername/travel
+After=network.target travel-backend.service
+
+[Service]
+Type=simple
+User=tazkia
+WorkingDirectory=/home/tazkia/travel/ml-service
+Environment=FLASK_ENV=production
+Environment=PORT=5001
+
+# Path to python and app
+ExecStart=/usr/bin/python3 app.py
+
+# Restart policy
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=travel-ml-service
+
+[Install]
+WantedBy=multi-user.target
