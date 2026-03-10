@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const axios = require('axios');
 
 const prisma = new PrismaClient();
-const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:5001';
+const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:5020';
 
 // Fetch training data from database
 const fetchTrainingData = async (req, res) => {
