@@ -264,11 +264,11 @@ async function main() {
   }
   console.log(`✅ Created ${schedules.length} schedules\n`);
 
-  // 8. Create Bookings (50+ bookings with varied dates)
+  // 8. Create Bookings (100+ bookings with varied dates)
   console.log('🎫 Creating bookings...');
   const bookings = [];
   const paymentMethods = ['CASH', 'TRANSFER', 'E_WALLET', 'QRIS'];
-  const targetBookings = 80; // Create more than 50 bookings
+  const targetBookings = 105; // Create 100+ bookings
 
   for (let i = 0; i < targetBookings; i++) {
     const schedule = randomItem(schedules);
