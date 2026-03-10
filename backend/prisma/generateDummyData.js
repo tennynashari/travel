@@ -58,11 +58,18 @@ async function main() {
   console.log('📍 Creating cities...');
   const createdCities = [];
   for (const city of cities) {
-    const created = await prisma.city.upsert({
-      where: { name: city.name },
-      update: {},
-      create: city
+    // Try to find existing city first
+    let created = await prisma.city.findFirst({
+      where: { name: city.name }
     });
+    
+    // If not found, create new one
+    if (!created) {
+      created = await prisma.city.create({
+        data: city
+      });
+    }
+    
     createdCities.push(created);
     console.log(`  ✓ ${city.name}, ${city.province}`);
   }
@@ -121,17 +128,24 @@ async function main() {
   const plateNumbers = ['B 1234 ABC', 'B 5678 DEF', 'D 9012 GHI', 'AB 3456 JKL', 'L 7890 MNO'];
   
   for (let i = 0; i < plateNumbers.length; i++) {
-    const vehicle = await prisma.vehicle.upsert({
-      where: { plateNumber: plateNumbers[i] },
-      update: {},
-      create: {
-        plateNumber: plateNumbers[i],
-        vehicleType: 'Bus',
-        capacity: 40,
-        seatTemplateId: seatTemplate.id,
-        status: 'ACTIVE'
-      }
+    // Try to find existing vehicle first
+    let vehicle = await prisma.vehicle.findFirst({
+      where: { plateNumber: plateNumbers[i] }
     });
+    
+    // If not found, create new one
+    if (!vehicle) {
+      vehicle = await prisma.vehicle.create({
+        data: {
+          plateNumber: plateNumbers[i],
+          vehicleType: 'Bus',
+          capacity: 40,
+          seatTemplateId: seatTemplate.id,
+          status: 'ACTIVE'
+        }
+      });
+    }
+    
     vehicles.push(vehicle);
     console.log(`  ✓ ${vehicle.plateNumber}`);
   }
@@ -144,27 +158,41 @@ async function main() {
   
   for (let i = 0; i < driverNames.length; i++) {
     const hashedPassword = await bcrypt.hash('driver123', 10);
-    const user = await prisma.user.upsert({
-      where: { email: `driver${i + 1}@travel.com` },
-      update: {},
-      create: {
-        email: `driver${i + 1}@travel.com`,
-        password: hashedPassword,
-        name: driverNames[i],
-        phone: `08123456${i}00`,
-        role: 'DRIVER'
-      }
+    
+    // Try to find existing user first
+    let user = await prisma.user.findFirst({
+      where: { email: `driver${i + 1}@travel.com` }
     });
+    
+    // If not found, create new one
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          email: `driver${i + 1}@travel.com`,
+          password: hashedPassword,
+          name: driverNames[i],
+          phone: `08123456${i}00`,
+          role: 'DRIVER'
+        }
+      });
+    }
 
-    const driver = await prisma.driver.upsert({
-      where: { userId: user.id },
-      update: {},
-      create: {
-        userId: user.id,
-        licenseNumber: `SIM-${1000 + i}`,
-        status: 'ACTIVE'
-      }
+    // Try to find existing driver
+    let driver = await prisma.driver.findFirst({
+      where: { userId: user.id }
     });
+    
+    // If not found, create new one
+    if (!driver) {
+      driver = await prisma.driver.create({
+        data: {
+          userId: user.id,
+          licenseNumber: `SIM-${1000 + i}`,
+          status: 'ACTIVE'
+        }
+      });
+    }
+    
     drivers.push(driver);
     console.log(`  ✓ ${user.name} (${driver.licenseNumber})`);
   }
@@ -181,17 +209,25 @@ async function main() {
 
   for (let i = 0; i < customerNames.length; i++) {
     const hashedPassword = await bcrypt.hash('customer123', 10);
-    const user = await prisma.user.upsert({
-      where: { email: `customer${i + 1}@email.com` },
-      update: {},
-      create: {
-        email: `customer${i + 1}@email.com`,
-        password: hashedPassword,
-        name: customerNames[i],
-        phone: `08129876${i.toString().padStart(3, '0')}`,
-        role: 'CUSTOMER'
-      }
+    
+    // Try to find existing user first
+    let user = await prisma.user.findFirst({
+      where: { email: `customer${i + 1}@email.com` }
     });
+    
+    // If not found, create new one
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          email: `customer${i + 1}@email.com`,
+          password: hashedPassword,
+          name: customerNames[i],
+          phone: `08129876${i.toString().padStart(3, '0')}`,
+          role: 'CUSTOMER'
+        }
+      });
+    }
+    
     customers.push(user);
   }
   console.log(`✅ Created ${customers.length} customers\n`);
