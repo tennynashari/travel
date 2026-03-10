@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const mlController = require('../controllers/ml.controller');
-const { authenticateToken } = require('../middleware/auth.middleware');
+const { authMiddleware } = require('../middleware/auth.middleware');
 
 // All ML routes require authentication
-router.use(authenticateToken);
+router.use(authMiddleware);
 
 // Health check
 router.get('/health', mlController.healthCheck);
