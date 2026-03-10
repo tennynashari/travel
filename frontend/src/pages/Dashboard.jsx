@@ -80,7 +80,7 @@ function Dashboard({ user, page = 'dashboard' }) {
         navigate('/laporan');
         break;
       case 'ai':
-        navigate('/ai-prediction');
+        navigate('/dashboard');
         break;
       case 'users':
         navigate('/manajemen-user');

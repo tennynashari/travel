@@ -113,14 +113,6 @@ function App() {
           } 
         />
         <Route 
-          path="/ai-prediction" 
-          element={
-            <ProtectedRoute>
-              <Dashboard user={user} page="ai" />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
           path="/manajemen-user" 
           element={
             <ProtectedRoute>
