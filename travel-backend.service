@@ -5,8 +5,10 @@ After=network.target postgresql.service
 
 [Service]
 Type=simple
-User=your-username
-WorkingDirectory=/path/to/travel/backend
+# USER YANG VALID: Ganti dengan output dari: whoami
+# Atau comment baris User untuk run as root (testing only)
+User=tazkia
+WorkingDirectory=/home/tazkia/travel/backend
 Environment=NODE_ENV=production
 Environment=PORT=5000
 Environment=DATABASE_URL=postgresql://user:password@localhost:5432/travel_db
